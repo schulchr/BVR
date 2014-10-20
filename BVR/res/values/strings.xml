@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>    
+    <string name="app_name">BVR</string>
+    <string name="toc">BVR: Beaver Volume Renderer</string>
+    <string name="tocHeader">This app framework was adopted from http://www.learnopengles.com/</string>
+    <string name="heatmap">Sample Volume: Heatmap</string>  
+    <string name="heatmap_subtitle">This sample creates a 3D texture of a heatmap from an equation.</string>
+</resources>
