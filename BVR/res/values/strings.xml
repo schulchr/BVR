@@ -5,4 +5,6 @@
     <string name="tocHeader">This app framework was adopted from http://www.learnopengles.com/</string>
     <string name="heatmap">Sample Volume: Heatmap</string>  
     <string name="heatmap_subtitle">This sample creates a 3D texture of a heatmap from an equation.</string>
+    <string name="head">Sample Volume: Scanned Head</string>  
+    <string name="head_subtitle">This sample gathers 3D data via images. Volume data retrieved from The Stanford Volume Data Archive</string>
 </resources>

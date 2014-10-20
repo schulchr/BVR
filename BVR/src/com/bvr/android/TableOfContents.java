@@ -16,6 +16,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.SimpleAdapter;
 
 import com.bvr.android.heatmap.HeatMapActivity;
+import com.bvr.android.head.HeadActivity;
 
 public class TableOfContents extends ListActivity 
 {
@@ -45,6 +46,14 @@ public class TableOfContents extends ListActivity
 			activityMapping.put(i++, HeatMapActivity.class);
 		}
 		
+		{
+			final Map<String, Object> item = new HashMap<String, Object>();
+			item.put(ITEM_IMAGE, R.drawable.head);
+			item.put(ITEM_TITLE, getText(R.string.head));
+			item.put(ITEM_SUBTITLE, getText(R.string.head_subtitle));
+			data.add(item);
+			activityMapping.put(i++, HeadActivity.class);
+		}
 		
 		final SimpleAdapter dataAdapter = new SimpleAdapter(this, data, R.layout.toc_item, new String[] {ITEM_IMAGE, ITEM_TITLE, ITEM_SUBTITLE}, new int[] {R.id.Image, R.id.Title, R.id.SubTitle});
 		setListAdapter(dataAdapter);	

@@ -31,6 +31,10 @@
         <activity
             android:name=".heatmap.HeatMapActivity"
             android:label="@string/heatmap" />
+        
+        <activity
+            android:name=".head.HeadActivity"
+            android:label="@string/head" />
 
         
     </application>
