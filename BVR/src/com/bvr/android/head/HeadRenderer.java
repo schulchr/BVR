@@ -63,6 +63,9 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 	/** Store the current rotation. */
 	private final float[] mCurrentRotation = new float[16];
 	
+	/** Store the current rotation. */
+	private final float[] mZoomMatrix = new float[16];
+	
 	/** A temporary matrix. */
 	private float[] mTemporaryMatrix = new float[16];
 	
@@ -153,6 +156,7 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 	private int mMaxHandle;
 	private int mDistHandle;
 	private int mStepsHandle;
+	private int mZoomHandle;
 	
 	/**
 	 * values that are passed into the shader
@@ -162,6 +166,7 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 	private static float mMax = 1.0f;
 	private static float mSteps = 100.0f;
 	private static float mDist  = 100.0f;
+	private static float mZoom = 1.0f;
 
 	/**
 	 * Initialize the model data.
@@ -304,8 +309,8 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 				int cubePositionDataOffset = 0;
 									
 				final int segments = mRequestedCubeFactor + (mRequestedCubeFactor - 1);
-				final float minPosition = -1.0f;
-				final float maxPosition = 1.0f;
+				final float minPosition = -0.5f;
+				final float maxPosition = 0.5f;
 				final float positionRange = maxPosition - minPosition;
 				
 				for (int x = 0; x < mRequestedCubeFactor; x++) {
@@ -436,7 +441,7 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 		// Position the eye in front of the origin.
 		final float eyeX = 0.0f;
 		final float eyeY = 0.0f;
-		final float eyeZ = -3.0f;
+		final float eyeZ = 10.0f;
 
 		// We are looking toward the distance
 		final float lookX = 0.0f;
@@ -517,14 +522,15 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
         mTextureUniformHandle = GLES30.glGetUniformLocation(mProgramHandle, "u_Texture");
         mPositionHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_Position");        
         mNormalHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_Normal"); 
-        mTextureCoordinateHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_TexCoordinate");
-        
+        mTextureCoordinateHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_TexCoordinate");        
 
         mAlphaHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uAmax");
         mMaxHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uMax");
         mMinHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uMin");
         mDistHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uDist");
         mStepsHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uNumSteps");
+
+        mZoomHandle    = GLES30.glGetUniformLocation(mProgramHandle, "u_Zoom");
         
         // Calculate position of the light. Push into the distance.
         Matrix.setIdentityM(mLightModelMatrix, 0);                     
@@ -551,6 +557,12 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
     	    	
         // Rotate the cube taking the overall rotation into account.     	
     	Matrix.multiplyMM(mTemporaryMatrix, 0, mModelMatrix, 0, mAccumulatedRotation, 0);
+    	System.arraycopy(mTemporaryMatrix, 0, mModelMatrix, 0, 16);   
+
+    	// Scale the cube  
+    	Matrix.setIdentityM(mZoomMatrix, 0);
+    	Matrix.scaleM(mZoomMatrix, 0, mZoom, mZoom, mZoom); 	
+    	Matrix.multiplyMM(mTemporaryMatrix, 0, mModelMatrix, 0, mZoomMatrix, 0);
     	System.arraycopy(mTemporaryMatrix, 0, mModelMatrix, 0, 16);   
     	
     	// This multiplies the view matrix by the model matrix, and stores
@@ -602,6 +614,7 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 		GLES30.glUniform1f(mMinHandle, mMin);
 		GLES30.glUniform1f(mStepsHandle, mSteps);
 		GLES30.glUniform1f(mDistHandle, mDist);
+		GLES30.glUniform1f(mZoomHandle, mZoom);
 
 		if (mCubes != null) {
 			mCubes.render();
@@ -746,13 +759,16 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
         
         AssetManager assman = mHeadActivity.getAssets();
         
-        ByteBuffer pixelBuffer = ByteBuffer.allocateDirect(256 * 256 * 99 * 4);
+        //Resorting to padding for now...sad but cannot figure out corner issue with non-cube geometry right now. 
+        //Definitely room for improvement here.
         
-        //ByteBuffer pixelPad    = ByteBuffer.allocateDirect(256 * 256 * 78  * 4);
+        ByteBuffer pixelBuffer = ByteBuffer.allocateDirect(256 * 256 * 256 * 4);
+        
+        ByteBuffer pixelPad    = ByteBuffer.allocateDirect(256 * 256 * 78  * 4);
         
         //Padding the data so it's centered in the cube
         pixelBuffer.position(0);
-        //pixelBuffer.put(pixelPad);
+        pixelBuffer.put(pixelPad);
         
         try {
         	fileList = assman.list("head");
@@ -791,7 +807,7 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
         GLES30.glBindTexture ( GLES30.GL_TEXTURE_3D, textureId[0] );
 
         //  Load the texture
-        GLES30.glTexImage3D ( GLES30.GL_TEXTURE_3D, 0, GLES30.GL_RGBA, 256, 256, 99, 0, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, pixelBuffer );
+        GLES30.glTexImage3D ( GLES30.GL_TEXTURE_3D, 0, GLES30.GL_RGBA, 256, 256, 256, 0, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, pixelBuffer );
 
         // Set the filtering mode
         GLES30.glTexParameteri ( GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_NEAREST );
@@ -819,5 +835,9 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
     public void setSteps(float steps)
     {
     	mSteps = steps;
+    }
+    public void setZoom(float zoom)
+    {
+    	mZoom = zoom;
     }
 }

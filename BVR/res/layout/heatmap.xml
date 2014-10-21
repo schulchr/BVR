@@ -8,47 +8,11 @@
 		android:id="@+id/gl_surface_view"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent" />
-	
-   <LinearLayout
-       android:layout_width="wrap_content"
-       android:layout_height="480dp"
-       android:layout_gravity="bottom"
-       android:orientation="horizontal" >
-		
-	    <com.bvr.android.VerticalSeekBar
-	        android:id="@+id/alphaSeekbar"
-	        android:max="100"
-	        android:layout_width="wrap_content" 
-	        android:layout_height="fill_parent"
-	        android:layout_marginRight="5dp"
-	        android:layout_marginTop="30dp"
-	        android:layout_marginBottom="30dp"
-	        android:progress="0" />
-	    <com.bvr.android.VerticalSeekBar
-	        android:id="@+id/minSeekbar"
-	        android:max="100"
-	        android:layout_width="wrap_content" 
-	        android:layout_height="fill_parent"
-	        android:layout_marginRight="5dp"
-	        android:layout_marginTop="30dp"
-	        android:layout_marginBottom="30dp"
-	        android:progress="0" />  
-	    <com.bvr.android.VerticalSeekBar
-	        android:id="@+id/maxSeekbar"
-	        android:max="100"
-	        android:layout_width="wrap_content" 
-	        android:layout_height="fill_parent"
-	        android:layout_marginRight="5dp"
-	        android:layout_marginTop="30dp"
-	        android:layout_marginBottom="30dp"
-	        android:progress="0" />
-     	
-	</LinearLayout>
 
    <LinearLayout
        android:layout_width="wrap_content"
-       android:layout_height="480dp"
-       android:layout_gravity="right|bottom"
+       android:layout_height="416dp"
+       android:layout_gravity="right|top"
        android:orientation="horizontal" >
 
        <com.bvr.android.VerticalSeekBar
@@ -70,6 +34,87 @@
            android:layout_marginTop="30dp"
            android:max="200"
            android:progress="0" />
+       
+       <com.bvr.android.VerticalSeekBar
+           android:id="@+id/zoomSeekbar"
+           android:layout_width="wrap_content"
+           android:layout_height="fill_parent"
+           android:layout_marginBottom="30dp"
+           android:layout_marginRight="5dp"
+           android:layout_marginTop="30dp"
+           android:max="300"
+           android:progress="100" />
    </LinearLayout>
+
+   <LinearLayout
+       android:layout_width="wrap_content"
+       android:layout_height="395dp"
+       android:layout_gravity="left|top"
+       android:orientation="horizontal" >
+
+       <com.bvr.android.VerticalSeekBar
+           android:id="@+id/alphaSeekbar"
+           android:layout_width="wrap_content"
+           android:layout_height="358dp"
+           android:layout_marginBottom="30dp"
+           android:layout_marginRight="5dp"
+           android:layout_marginTop="30dp"
+           android:max="100"
+           android:progress="0" />
+
+       <com.bvr.android.VerticalSeekBar
+           android:id="@+id/minSeekbar"
+           android:layout_width="wrap_content"
+           android:layout_height="358dp"
+           android:layout_marginBottom="30dp"
+           android:layout_marginRight="5dp"
+           android:layout_marginTop="30dp"
+           android:max="100"
+           android:progress="0" />
+
+       <com.bvr.android.VerticalSeekBar
+           android:id="@+id/maxSeekbar"
+           android:layout_width="wrap_content"
+           android:layout_height="358dp"
+           android:layout_marginBottom="30dp"
+           android:layout_marginRight="5dp"
+           android:layout_marginTop="30dp"
+           android:max="100"
+           android:progress="0" />
 	
+   </LinearLayout>
+
+   <LinearLayout
+       android:layout_width="wrap_content"
+       android:layout_height="67dp"
+       android:layout_gravity="bottom" >
+
+       <EditText
+           android:id="@+id/editText1"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="A"
+           android:editable="false" >
+
+           <requestFocus />
+       </EditText>
+
+       <EditText
+           android:id="@+id/editText2"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="Mn"
+           android:editable="false" />
+
+       <EditText
+           android:id="@+id/editText3"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="Mx"
+           android:editable="false" >
+
+           <requestFocus />
+       </EditText>
+   </LinearLayout>
+
 </FrameLayout>

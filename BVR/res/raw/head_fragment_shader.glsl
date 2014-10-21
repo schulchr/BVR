@@ -23,7 +23,7 @@ void main()
 {    
 	float astar = 1.0;
 	vec3 cstar  = vec3(0., 0., 0.);
-	vec3 camDir = vec3(inverse(u_MMatrix) * vec4(0.0, 0.0, 1., 0.));
+	vec3 camDir = vec3(inverse(u_MMatrix) * vec4(0.0, 0.0, -1., 0.));
 	
 	//Get the sampling ray direction		
 	vec3 uDirSTP = camDir/uDist;
@@ -61,5 +61,7 @@ void main()
 			break;
 	}
     gl_FragColor = vec4(cstar, 1.0);
+    
+    //gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
   }                                                                     	
 

@@ -46,6 +46,10 @@ public class HeatMapRenderer implements GLSurfaceView.Renderer {
 	/** Store the projection matrix. This is used to project the scene onto a 2D viewport. */
 	private float[] mProjectionMatrix = new float[16];
 	
+
+	/** Store the current rotation. */
+	private final float[] mZoomMatrix = new float[16];
+	
 	/** Allocate storage for the final combined matrix. This will be passed into the shader program. */
 	private float[] mMVPMatrix = new float[16];
 	
@@ -90,22 +94,7 @@ public class HeatMapRenderer implements GLSurfaceView.Renderer {
 	/** This will be used to pass in model normal information. */
 	private int mNormalHandle;
 	
-	/** This will be used to pass in model slider information. */
-	private int mAlphaHandle;
-	private int mMinHandle;
-	private int mMaxHandle;
-	private int mDistHandle;
-	private int mStepsHandle;
-	
-	/**
-	 * values that are passed into the shader
-	 */
-	private static float mAlpha = 1.0f;
-	private static float mMin = 0.0f;
-	private static float mMax = 1.0f;
-	private static float mSteps = 100.0f;
-	private static float mDist  = 100.0f;
-	
+
 	/** This will be used to pass in model texture coordinate information. */
 	private int mTextureCoordinateHandle;
 	
@@ -157,7 +146,23 @@ public class HeatMapRenderer implements GLSurfaceView.Renderer {
 	/** The current cubes object. */
 	private Cubes mCubes;
 	
-
+	/** This will be used to pass in model slider information. */
+	private int mAlphaHandle;
+	private int mMinHandle;
+	private int mMaxHandle;
+	private int mDistHandle;
+	private int mStepsHandle;
+	private int mZoomHandle;
+	
+	/**
+	 * values that are passed into the shader
+	 */
+	private static float mAlpha = 1.0f;
+	private static float mMin = 0.0f;
+	private static float mMax = 1.0f;
+	private static float mSteps = 100.0f;
+	private static float mDist  = 100.0f;
+	private static float mZoom = 1.0f;
 
 	/**
 	 * Initialize the model data.
@@ -300,8 +305,8 @@ public class HeatMapRenderer implements GLSurfaceView.Renderer {
 				int cubePositionDataOffset = 0;
 									
 				final int segments = mRequestedCubeFactor + (mRequestedCubeFactor - 1);
-				final float minPosition = -1.0f;
-				final float maxPosition = 1.0f;
+				final float minPosition = -0.5f;
+				final float maxPosition = 0.5f;
 				final float positionRange = maxPosition - minPosition;
 				
 				for (int x = 0; x < mRequestedCubeFactor; x++) {
@@ -432,7 +437,7 @@ public class HeatMapRenderer implements GLSurfaceView.Renderer {
 		// Position the eye in front of the origin.
 		final float eyeX = 0.0f;
 		final float eyeY = 0.0f;
-		final float eyeZ = -3.0f;
+		final float eyeZ = -10.0f;
 
 		// We are looking toward the distance
 		final float lookX = 0.0f;
@@ -540,6 +545,8 @@ public class HeatMapRenderer implements GLSurfaceView.Renderer {
         mPositionHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_Position");        
         mNormalHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_Normal"); 
         mTextureCoordinateHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_TexCoordinate");
+
+        mZoomHandle    = GLES30.glGetUniformLocation(mProgramHandle, "u_Zoom");
         
         // Calculate position of the light. Push into the distance.
         Matrix.setIdentityM(mLightModelMatrix, 0);                     
@@ -567,6 +574,13 @@ public class HeatMapRenderer implements GLSurfaceView.Renderer {
         // Rotate the cube taking the overall rotation into account.     	
     	Matrix.multiplyMM(mTemporaryMatrix, 0, mModelMatrix, 0, mAccumulatedRotation, 0);
     	System.arraycopy(mTemporaryMatrix, 0, mModelMatrix, 0, 16);   
+    	
+    	// Scale the cube  
+    	Matrix.setIdentityM(mZoomMatrix, 0);
+    	Matrix.scaleM(mZoomMatrix, 0, mZoom, mZoom, mZoom); 	
+    	Matrix.multiplyMM(mTemporaryMatrix, 0, mModelMatrix, 0, mZoomMatrix, 0);
+    	System.arraycopy(mTemporaryMatrix, 0, mModelMatrix, 0, 16);   
+    	
     	
     	// This multiplies the view matrix by the model matrix, and stores
 		// the result in the MVP matrix
@@ -618,6 +632,8 @@ public class HeatMapRenderer implements GLSurfaceView.Renderer {
 		GLES30.glUniform1f(mMinHandle, mMin);
 		GLES30.glUniform1f(mStepsHandle, mSteps);
 		GLES30.glUniform1f(mDistHandle, mDist);
+
+		GLES30.glUniform1f(mZoomHandle, mZoom);
 		
 		if (mCubes != null) {
 			mCubes.render();
@@ -859,5 +875,9 @@ public class HeatMapRenderer implements GLSurfaceView.Renderer {
     public void setSteps(float steps)
     {
     	mSteps = steps;
+    }
+    public void setZoom(float zoom)
+    {
+    	mZoom = zoom;
     }
 }

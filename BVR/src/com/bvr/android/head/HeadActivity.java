@@ -141,6 +141,25 @@ public class HeadActivity extends Activity {
 					// TODO Auto-generated method stub					
 				}
 
+			  });
+		
+		VerticalSeekBar zoomBar = (VerticalSeekBar)findViewById(R.id.zoomSeekbar);
+		zoomBar.incrementProgressBy(100);
+		zoomBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+				@Override
+			   public void onProgressChanged(SeekBar seekBar, int progress,
+			     boolean fromUser) {					
+			    	mRenderer.setZoom(progress/100.0f);			    	
+			   }
+				@Override
+				public void onStartTrackingTouch(SeekBar arg0) {
+					// TODO Auto-generated method stub					
+				}
+				@Override
+				public void onStopTrackingTouch(SeekBar arg0) {
+					// TODO Auto-generated method stub					
+				}
+
 			  });  
 	}
 
