@@ -9,8 +9,11 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import com.bvr.android.R;
+import com.bvr.android.VerticalSeekBar;
 
 public class HeadActivity extends Activity {
 	/** Hold a reference to our GLSurfaceView */
@@ -45,7 +48,100 @@ public class HeadActivity extends Activity {
 			// renderer if you wanted to support both ES 1 and ES 2.
 			return;
 		}
+		VerticalSeekBar alphaBar = (VerticalSeekBar)findViewById(R.id.alphaSeekbar);
+		alphaBar.incrementProgressBy(100);
+		alphaBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+				@Override
+			   public void onProgressChanged(SeekBar seekBar, int progress,
+			     boolean fromUser) {					
+			    	mRenderer.setAlpha(progress/100.0f);			    	
+			   }
+				@Override
+				public void onStartTrackingTouch(SeekBar arg0) {
+					// TODO Auto-generated method stub					
+				}
+				@Override
+				public void onStopTrackingTouch(SeekBar arg0) {
+					// TODO Auto-generated method stub					
+				}
+
+			  });   
 		
+		VerticalSeekBar minBar = (VerticalSeekBar)findViewById(R.id.minSeekbar);
+		minBar.incrementProgressBy(0);
+		minBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+				@Override
+			   public void onProgressChanged(SeekBar seekBar, int progress,
+			     boolean fromUser) {					
+			    	mRenderer.setMin(progress/100.0f);			    	
+			   }
+				@Override
+				public void onStartTrackingTouch(SeekBar arg0) {
+					// TODO Auto-generated method stub					
+				}
+				@Override
+				public void onStopTrackingTouch(SeekBar arg0) {
+					// TODO Auto-generated method stub					
+				}
+
+			  });   
+		
+		VerticalSeekBar maxBar = (VerticalSeekBar)findViewById(R.id.maxSeekbar);
+		maxBar.incrementProgressBy(100);
+		maxBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+				@Override
+			   public void onProgressChanged(SeekBar seekBar, int progress,
+			     boolean fromUser) {					
+			    	mRenderer.setMax(progress/100.0f);			    	
+			   }
+				@Override
+				public void onStartTrackingTouch(SeekBar arg0) {
+					// TODO Auto-generated method stub					
+				}
+				@Override
+				public void onStopTrackingTouch(SeekBar arg0) {
+					// TODO Auto-generated method stub					
+				}
+
+			  });   
+		
+		VerticalSeekBar distBar = (VerticalSeekBar)findViewById(R.id.distSeekbar);
+		distBar.incrementProgressBy(100);
+		distBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+				@Override
+			   public void onProgressChanged(SeekBar seekBar, int progress,
+			     boolean fromUser) {					
+			    	mRenderer.setDist(progress);			    	
+			   }
+				@Override
+				public void onStartTrackingTouch(SeekBar arg0) {
+					// TODO Auto-generated method stub					
+				}
+				@Override
+				public void onStopTrackingTouch(SeekBar arg0) {
+					// TODO Auto-generated method stub					
+				}
+
+			  });  
+		
+		VerticalSeekBar stepBar = (VerticalSeekBar)findViewById(R.id.numStepsSeekbar);
+		stepBar.incrementProgressBy(100);
+		stepBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+				@Override
+			   public void onProgressChanged(SeekBar seekBar, int progress,
+			     boolean fromUser) {					
+			    	mRenderer.setSteps(progress);			    	
+			   }
+				@Override
+				public void onStartTrackingTouch(SeekBar arg0) {
+					// TODO Auto-generated method stub					
+				}
+				@Override
+				public void onStopTrackingTouch(SeekBar arg0) {
+					// TODO Auto-generated method stub					
+				}
+
+			  });  
 	}
 
 	@Override

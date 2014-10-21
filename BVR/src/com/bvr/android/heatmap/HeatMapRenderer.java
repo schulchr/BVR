@@ -90,6 +90,22 @@ public class HeatMapRenderer implements GLSurfaceView.Renderer {
 	/** This will be used to pass in model normal information. */
 	private int mNormalHandle;
 	
+	/** This will be used to pass in model slider information. */
+	private int mAlphaHandle;
+	private int mMinHandle;
+	private int mMaxHandle;
+	private int mDistHandle;
+	private int mStepsHandle;
+	
+	/**
+	 * values that are passed into the shader
+	 */
+	private static float mAlpha = 1.0f;
+	private static float mMin = 0.0f;
+	private static float mMax = 1.0f;
+	private static float mSteps = 100.0f;
+	private static float mDist  = 100.0f;
+	
 	/** This will be used to pass in model texture coordinate information. */
 	private int mTextureCoordinateHandle;
 	
@@ -140,6 +156,8 @@ public class HeatMapRenderer implements GLSurfaceView.Renderer {
 	
 	/** The current cubes object. */
 	private Cubes mCubes;
+	
+
 
 	/**
 	 * Initialize the model data.
@@ -511,6 +529,13 @@ public class HeatMapRenderer implements GLSurfaceView.Renderer {
         mMMatrixHandle = GLES30.glGetUniformLocation(mProgramHandle, "u_MMatrix");
         mVPMatrixHandle = GLES30.glGetUniformLocation(mProgramHandle, "u_VPMatrix"); 
         mLightPosHandle = GLES30.glGetUniformLocation(mProgramHandle, "u_LightPos");
+        
+        mAlphaHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uAmax");
+        mMaxHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uMax");
+        mMinHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uMin");
+        mDistHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uDist");
+        mStepsHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uNumSteps");
+        
         mTextureUniformHandle = GLES30.glGetUniformLocation(mProgramHandle, "u_Texture");
         mPositionHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_Position");        
         mNormalHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_Normal"); 
@@ -585,7 +610,15 @@ public class HeatMapRenderer implements GLSurfaceView.Renderer {
 		// Tell the texture uniform sampler to use this texture in the
 		// shader by binding to texture unit 0.
 		GLES30.glUniform1i(mTextureUniformHandle, 0);
-        
+		
+		
+		//Send in all slider info
+		GLES30.glUniform1f(mAlphaHandle, mAlpha);
+		GLES30.glUniform1f(mMaxHandle, mMax);
+		GLES30.glUniform1f(mMinHandle, mMin);
+		GLES30.glUniform1f(mStepsHandle, mSteps);
+		GLES30.glUniform1f(mDistHandle, mDist);
+		
 		if (mCubes != null) {
 			mCubes.render();
 		}
@@ -805,5 +838,26 @@ public class HeatMapRenderer implements GLSurfaceView.Renderer {
     	}
     	
     	return (int)temp;
+    }
+    
+    public void setAlpha(float alpha)
+    {
+    	mAlpha = alpha;
+    }
+    public void setMin(float min)
+    {
+    	mMin = min;
+    }
+    public void setMax(float max)
+    {
+    	mMax = max;
+    }
+    public void setDist(float dist)
+    {
+    	mDist = dist;
+    }
+    public void setSteps(float steps)
+    {
+    	mSteps = steps;
     }
 }

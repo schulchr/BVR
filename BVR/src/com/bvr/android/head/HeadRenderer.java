@@ -146,6 +146,22 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 	/** The current cubes object. */
 	private Cubes mCubes;
 	
+	
+	/** This will be used to pass in model slider information. */
+	private int mAlphaHandle;
+	private int mMinHandle;
+	private int mMaxHandle;
+	private int mDistHandle;
+	private int mStepsHandle;
+	
+	/**
+	 * values that are passed into the shader
+	 */
+	private static float mAlpha = 1.0f;
+	private static float mMin = 0.0f;
+	private static float mMax = 1.0f;
+	private static float mSteps = 100.0f;
+	private static float mDist  = 100.0f;
 
 	/**
 	 * Initialize the model data.
@@ -503,6 +519,13 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
         mNormalHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_Normal"); 
         mTextureCoordinateHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_TexCoordinate");
         
+
+        mAlphaHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uAmax");
+        mMaxHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uMax");
+        mMinHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uMin");
+        mDistHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uDist");
+        mStepsHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uNumSteps");
+        
         // Calculate position of the light. Push into the distance.
         Matrix.setIdentityM(mLightModelMatrix, 0);                     
         Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, -1.0f);
@@ -572,7 +595,14 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 		// Tell the texture uniform sampler to use this texture in the
 		// shader by binding to texture unit 0.
 		GLES30.glUniform1i(mTextureUniformHandle, 0);
-        
+		
+		//Send in all slider info
+		GLES30.glUniform1f(mAlphaHandle, mAlpha);
+		GLES30.glUniform1f(mMaxHandle, mMax);
+		GLES30.glUniform1f(mMinHandle, mMin);
+		GLES30.glUniform1f(mStepsHandle, mSteps);
+		GLES30.glUniform1f(mDistHandle, mDist);
+
 		if (mCubes != null) {
 			mCubes.render();
 		}
@@ -768,5 +798,26 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
         GLES30.glTexParameteri ( GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_NEAREST );
 
         return textureId[0];        
+    }
+    
+    public void setAlpha(float alpha)
+    {
+    	mAlpha = alpha;
+    }
+    public void setMin(float min)
+    {
+    	mMin = min;
+    }
+    public void setMax(float max)
+    {
+    	mMax = max;
+    }
+    public void setDist(float dist)
+    {
+    	mDist = dist;
+    }
+    public void setSteps(float steps)
+    {
+    	mSteps = steps;
     }
 }

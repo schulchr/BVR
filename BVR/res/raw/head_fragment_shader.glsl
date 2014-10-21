@@ -5,12 +5,18 @@ uniform vec3 u_LightPos;       	// The position of the light in eye space.
 uniform sampler3D u_Texture;    // The input texture.
 uniform mat4 u_MMatrix;		// A constant representing the combined model/view matrix.    
 uniform mat4 u_MVMatrix;		// A constant representing the combined model/view matrix.
-uniform mat4 u_MVPMatrix;		// A constant representing the combined model/view matrix.    
+uniform mat4 u_MVPMatrix;		// A constant representing the combined model/view matrix. 
+   
 in vec3 v_Position;		// Interpolated position for this fragment.
 in vec3 v_Normal;         	// Interpolated normal for this fragment.
 in vec3 v_TexCoordinate;   // Interpolated texture coordinate per fragment.
 
-
+//Slider values
+uniform float uAmax;
+uniform float uMin;
+uniform float uMax;
+uniform float uNumSteps;
+uniform float uDist;
  
 // The entry point for our fragment shader.
 void main()                    		
@@ -20,18 +26,12 @@ void main()
 	vec3 camDir = vec3(inverse(u_MMatrix) * vec4(0.0, 0.0, 1., 0.));
 	
 	//Get the sampling ray direction		
-	vec3 uDirSTP = camDir/150.;
+	vec3 uDirSTP = camDir/uDist;
 	
-	int uNumSteps = 150;
-	
-	//These values will be controlled by sliders later
-	float uMin  = 0.10;
-	float uMax  = 0.55;
-	float uAmax = 0.10;
 	
 	vec3 STP = v_TexCoordinate;
 	
-	for(int i = 0; i < uNumSteps; i++, STP += uDirSTP)
+	for(int i = 0; i < int(uNumSteps); i++, STP += uDirSTP)
 	{
 		if(any(lessThan(STP, vec3(0., 0., 0.))))
 			break;

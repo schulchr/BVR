@@ -3,15 +3,73 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"	
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
+
 	<com.bvr.android.heatmap.HeatMapGLSurfaceView
 		android:id="@+id/gl_surface_view"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent" />
-	<LinearLayout		
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_gravity="bottom|center_horizontal"
-		android:orientation="horizontal">
+	
+   <LinearLayout
+       android:layout_width="wrap_content"
+       android:layout_height="480dp"
+       android:layout_gravity="bottom"
+       android:orientation="horizontal" >
+		
+	    <com.bvr.android.VerticalSeekBar
+	        android:id="@+id/alphaSeekbar"
+	        android:max="100"
+	        android:layout_width="wrap_content" 
+	        android:layout_height="fill_parent"
+	        android:layout_marginRight="5dp"
+	        android:layout_marginTop="30dp"
+	        android:layout_marginBottom="30dp"
+	        android:progress="0" />
+	    <com.bvr.android.VerticalSeekBar
+	        android:id="@+id/minSeekbar"
+	        android:max="100"
+	        android:layout_width="wrap_content" 
+	        android:layout_height="fill_parent"
+	        android:layout_marginRight="5dp"
+	        android:layout_marginTop="30dp"
+	        android:layout_marginBottom="30dp"
+	        android:progress="0" />  
+	    <com.bvr.android.VerticalSeekBar
+	        android:id="@+id/maxSeekbar"
+	        android:max="100"
+	        android:layout_width="wrap_content" 
+	        android:layout_height="fill_parent"
+	        android:layout_marginRight="5dp"
+	        android:layout_marginTop="30dp"
+	        android:layout_marginBottom="30dp"
+	        android:progress="0" />
+     	
 	</LinearLayout>
 
+   <LinearLayout
+       android:layout_width="wrap_content"
+       android:layout_height="480dp"
+       android:layout_gravity="right|bottom"
+       android:orientation="horizontal" >
+
+       <com.bvr.android.VerticalSeekBar
+           android:id="@+id/numStepsSeekbar"
+           android:layout_width="wrap_content"
+           android:layout_height="fill_parent"
+           android:layout_marginBottom="30dp"
+           android:layout_marginRight="5dp"
+           android:layout_marginTop="30dp"
+           android:max="200"
+           android:progress="0" />
+
+       <com.bvr.android.VerticalSeekBar
+           android:id="@+id/distSeekbar"
+           android:layout_width="wrap_content"
+           android:layout_height="fill_parent"
+           android:layout_marginBottom="30dp"
+           android:layout_marginRight="5dp"
+           android:layout_marginTop="30dp"
+           android:max="200"
+           android:progress="0" />
+   </LinearLayout>
+	
 </FrameLayout>
