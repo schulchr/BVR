@@ -425,7 +425,7 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 		// We are looking toward the distance
 		final float lookX = 0.0f;
 		final float lookY = 0.0f;
-		final float lookZ = 5.0f;
+		final float lookZ = 1.0f;
 
 		// Set our up vector. This is where our head would be pointing were we holding the camera.
 		final float upX = 0.0f;
@@ -437,8 +437,8 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 		// view matrix. In OpenGL 2, we can keep track of these matrices separately if we choose.
 		Matrix.setLookAtM(mViewMatrix, 0, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ);		
 
-		final String vertexShader = RawResourceReader.readTextFileFromRawResource(mHeadActivity, R.raw.lesson_seven_vertex_shader);   		
- 		final String fragmentShader = RawResourceReader.readTextFileFromRawResource(mHeadActivity, R.raw.lesson_seven_fragment_shader);
+		final String vertexShader = RawResourceReader.readTextFileFromRawResource(mHeadActivity, R.raw.head_vertex_shader);   		
+ 		final String fragmentShader = RawResourceReader.readTextFileFromRawResource(mHeadActivity, R.raw.head_fragment_shader);
  				
 		final int vertexShaderHandle = ShaderHelper.compileShader(GLES30.GL_VERTEX_SHADER, vertexShader);		
 		final int fragmentShaderHandle = ShaderHelper.compileShader(GLES30.GL_FRAGMENT_SHADER, fragmentShader);		
@@ -446,27 +446,7 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 		mProgramHandle = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, 
 				new String[] {"a_Position",  "a_Normal", "a_TexCoordinate"});		            
         
-		// Load the texture
-		//mAndroidDataHandle = TextureHelper.loadTexture(mHeadActivity, R.drawable.usb_android);
-		/*
-		 * 2D custom texture example
-		 /
-		mAndroidDataHandle = TextureHelper.createSimpleTexture2D();		
-		GLES30.glBindTexture(GLES30.GL_TEXTURE_3D, mAndroidDataHandle);		
-		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);		
-		
-		GLES30.glBindTexture(GLES30.GL_TEXTURE_3D, mAndroidDataHandle);		
-		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR);
-
-		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE);
-		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE);
-		*/
-		
-		/*
-		 * 3D custom texture example
-		 */
-		//mAndroidDataHandle = TextureHelper.createSimpleTexture3D();	
-		
+		// Load the texture		
 		mAndroidDataHandle = createHead3DTexture(256);	
 		
 		GLES30.glBindTexture(GLES30.GL_TEXTURE_3D, mAndroidDataHandle);		
@@ -497,10 +477,11 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 		final float bottom = -1.0f;
 		final float top = 1.0f;
 		final float near = 1.0f;
-		final float far = 1000.0f;
+		final float far = 100.0f;
 		
 		//Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
-		Matrix.perspectiveM(mProjectionMatrix, 0, 90, ratio, near, far);
+		Matrix.orthoM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
+		//Matrix.perspectiveM(mProjectionMatrix, 0, 90, ratio, near, far);
 	}	
 
 	@Override
@@ -735,8 +716,14 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
         
         AssetManager assman = mHeadActivity.getAssets();
         
-        ByteBuffer pixelBuffer = ByteBuffer.allocateDirect(256 * 256 * 128* 4);
+        ByteBuffer pixelBuffer = ByteBuffer.allocateDirect(256 * 256 * 99 * 4);
+        
+        //ByteBuffer pixelPad    = ByteBuffer.allocateDirect(256 * 256 * 78  * 4);
+        
+        //Padding the data so it's centered in the cube
         pixelBuffer.position(0);
+        //pixelBuffer.put(pixelPad);
+        
         try {
         	fileList = assman.list("head");
         	for(int i = 0; i < fileList.length; i++)
@@ -761,7 +748,6 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        
 
         pixelBuffer.position(0);
         
@@ -775,7 +761,7 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
         GLES30.glBindTexture ( GLES30.GL_TEXTURE_3D, textureId[0] );
 
         //  Load the texture
-        GLES30.glTexImage3D ( GLES30.GL_TEXTURE_3D, 0, GLES30.GL_RGBA, 256, 256, 100, 0, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, pixelBuffer );
+        GLES30.glTexImage3D ( GLES30.GL_TEXTURE_3D, 0, GLES30.GL_RGBA, 256, 256, 99, 0, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, pixelBuffer );
 
         // Set the filtering mode
         GLES30.glTexParameteri ( GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_NEAREST );

@@ -18,16 +18,22 @@ out vec3 v_TexCoordinate;   // This will be passed into the fragment shader.
 // The entry point for our vertex shader.  
 void main()                                                 	
 {                                                         
-	// Transform the vertex into eye space. 	
-	//v_Position = vec3(u_MMatrix * a_Position);            		
+	// Transform the vertex into eye space.
 	v_Position = a_Position.xyz;
+	
+	//Checks if a cube volume data, if not, must change the cube so no distortion occurs
+	float factor = 1. / 2.;
+	v_Position.z *= factor;
+	
 	// Pass through the texture coordinate.
-	v_TexCoordinate = vec3((a_Position.x + 1.0)/2.0, (a_Position.y + 1.0)/2.0, (a_Position.z + 1.0)/2.0);                                      
-	//v_TexCoordinate = vec3((v_Position.x + 1.0)/2.0, (v_Position.y + 1.0)/2.0, (v_Position.z + 1.0)/2.0);     
+	v_TexCoordinate = vec3((v_Position.x + 1.0)/2.0, (v_Position.y + 1.0)/2.0, (v_Position.z + factor)/(2.0 * factor));
+	
 	// Transform the normal's orientation into eye space.
     v_Normal = vec3(u_MVMatrix * vec4(a_Normal, 0.0));
           
 	// gl_Position is a special variable used to store the final position.
 	// Multiply the vertex by the matrix to get the final point in normalized screen coordinates.
-	gl_Position = u_MVPMatrix * a_Position;                       		  
+	vec4 pos = a_Position;
+	pos.z *= factor;
+	gl_Position = u_MVPMatrix * pos;                   		  
 }                                                          

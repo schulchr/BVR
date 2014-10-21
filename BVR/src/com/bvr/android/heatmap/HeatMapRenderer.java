@@ -431,8 +431,8 @@ public class HeatMapRenderer implements GLSurfaceView.Renderer {
 		// view matrix. In OpenGL 2, we can keep track of these matrices separately if we choose.
 		Matrix.setLookAtM(mViewMatrix, 0, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ);		
 
-		final String vertexShader = RawResourceReader.readTextFileFromRawResource(mHeatMapActivity, R.raw.lesson_seven_vertex_shader);   		
- 		final String fragmentShader = RawResourceReader.readTextFileFromRawResource(mHeatMapActivity, R.raw.lesson_seven_fragment_shader);
+		final String vertexShader = RawResourceReader.readTextFileFromRawResource(mHeatMapActivity, R.raw.heatmap_vertex_shader);   		
+ 		final String fragmentShader = RawResourceReader.readTextFileFromRawResource(mHeatMapActivity, R.raw.heatmap_fragment_shader);
  				
 		final int vertexShaderHandle = ShaderHelper.compileShader(GLES30.GL_VERTEX_SHADER, vertexShader);		
 		final int fragmentShaderHandle = ShaderHelper.compileShader(GLES30.GL_FRAGMENT_SHADER, fragmentShader);		
@@ -493,8 +493,8 @@ public class HeatMapRenderer implements GLSurfaceView.Renderer {
 		final float near = 1.0f;
 		final float far = 1000.0f;
 		
-		//Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
-		Matrix.perspectiveM(mProjectionMatrix, 0, 90, ratio, near, far);
+		Matrix.orthoM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
+		//Matrix.perspectiveM(mProjectionMatrix, 0, 90, ratio, near, far);
 	}	
 
 	@Override

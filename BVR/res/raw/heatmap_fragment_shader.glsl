@@ -103,45 +103,81 @@ void main()
 {    
 	float astar = 1.0;
 	vec3 cstar  = vec3(0., 0., 0.);
-	vec3 camPos = vec3(inverse(u_MMatrix) * vec4(0.0, 0.0, -3., 0.));
+	vec3 camDir = normalize(vec3(inverse(u_MMatrix) * vec4(0.0, 0.0, 1., 0.)));
 	
-	//Get the sampling ray direction	
-	vec3 sampleDirection = v_Position - camPos;
+	//Get the sampling ray direction		
+	vec3 uDirSTP = camDir/175.;
 	
-	vec3 uDirSTP = sampleDirection/255.;
-	
-	int uNumSteps = 225;
+	int uNumSteps = 175;
 	
 	//These values will be controlled by sliders later
 	float uMin  = 0.10;
-	float uMax  = 0.35;
+	float uMax  = 0.30;
 	float uAmax = 0.10;
 	
 	vec3 STP = v_TexCoordinate;
 	
 	for(int i = 0; i < uNumSteps; i++, STP += uDirSTP)
 	{
-		if(any(lessThan(STP, vec3(0., 0., 0.))))
-			break;
-		if(any(greaterThan(STP, vec3(1.0, 1.0, 1.0))))
+		if(any(lessThan(STP, vec3(0., 0., 0.))) || any(greaterThan(STP, vec3(1.0, 1.0, 1.0))))
 			break;
 			
 		//Sample the texture
 		float scalar = texture(u_Texture, STP).r;
 		
 		//Skip if they're past thresholds
-		if(scalar < uMin)
+		if(scalar < uMin || scalar > uMax)
 		{
 			continue;
 		}
-		//if(scalar > uMax)
-		//{
-		//	continue;
-		//}
+		
 			
 		//Convert to color here
 		vec3 rgb = HsvRgb(vec3(240.-240.*(scalar/(.39215)), 1., 1.));
 		
+		// get an rgb from the hue itself: 
+	/*
+	float h = 240.-240.*(scalar/(.39215);
+	float s = 1.0;
+	float v = 1.0;
+	int i = int(floor(h));
+	float f = h - float(i);
+	float p = v * (1. - s);
+	float q = v * (1. - s*f);
+	float t = v * (1. - (s * (1. - f)));
+
+	switch (i)
+	{
+		case 0:
+		r = v;  g = t;  b = p;
+		break;
+		
+		case 1:
+		r = q;  g = v;  b = p;
+		break;
+		
+		case 2:
+		r = p;  g = v;  b = t;
+		break;
+		
+		case 3:
+		r = p;  g = q;  b = v;
+		break;
+		
+		case 4:
+		r = t;  g = p;  b = v;
+		break;
+		
+		case 5:
+		r = v;  g = p;  b = q;
+		break;
+	}
+	
+	rgb.r = r;
+	rgb.g = g;
+	rgb.b = b;
+		*/
+		//
 		float alpha = uAmax;
 		
 		cstar += astar * alpha * rgb; 
