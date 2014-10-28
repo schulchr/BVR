@@ -98,8 +98,8 @@ void main()
 	
 	
 	//Apply lighting
-	vec3 lightPos = vec3(0.0, 1.0, 1.0);
-	vec3 lf = lightPos - v_Position;
+	vec3 lightPos = vec3(0.0, 0.0, 1.0);
+	vec3 lf = normalize(lightPos) - normalize(v_Position);
 	vec3 light = normalize(lf);
 	vec3 ambient = .5 * cstar;
 	float d  = max(dot(gradient, light), 0.);
