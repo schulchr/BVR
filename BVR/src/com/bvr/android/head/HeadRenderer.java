@@ -719,7 +719,7 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 			GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mCubeBufferIdx);
 			GLES30.glEnableVertexAttribArray(mPositionHandle);
 			GLES30.glVertexAttribPointer(mPositionHandle, POSITION_DATA_SIZE, GLES30.GL_FLOAT, false, stride, 0);
-
+			
 			// Pass in the normal information
 			GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, mCubeBufferIdx);
 			GLES30.glEnableVertexAttribArray(mNormalHandle);

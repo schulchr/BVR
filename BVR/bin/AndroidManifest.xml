@@ -3,7 +3,10 @@
     package="com.bvr.android"
     android:versionCode="11"
     android:versionName="1.0.8.1" >
-
+    
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+	
     <uses-sdk
         android:minSdkVersion="19"
         android:targetSdkVersion="19" />
@@ -35,6 +38,10 @@
         <activity
             android:name=".head.HeadActivity"
             android:label="@string/head" />
+        
+        <activity
+            android:name=".raw.RawActivity"
+            android:label="@string/raw" />
 
         
     </application>

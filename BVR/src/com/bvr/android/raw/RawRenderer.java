@@ -1,6 +1,13 @@
-package com.bvr.android.head;
+package com.bvr.android.raw;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -10,7 +17,6 @@ import java.util.concurrent.Executors;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import android.content.res.AssetManager;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -19,19 +25,19 @@ import com.bvr.android.R;
 import com.bvr.android.common.RawResourceReader;
 import com.bvr.android.common.ShaderHelper;
 import com.bvr.android.common.ShapeBuilder;
-import com.bvr.android.common.TextureHelper;
 
 /**
  * This class implements our custom renderer. Note that the GL10 parameter
  * passed in is unused for OpenGL ES 2.0 renderers -- the static class GLES30 is
  * used instead.
  */
-public class HeadRenderer implements GLSurfaceView.Renderer {
+public class RawRenderer implements GLSurfaceView.Renderer {
 	/** Used for debug logs. */
-	private static final String TAG = "HeadRenderer";
+	private static final String TAG = "RawRenderer";
 
-	private static HeadActivity mHeadActivity;
+	private static RawActivity mRawActivity;
 	private final GLSurfaceView mGlSurfaceView;
+	
 	
 	/**
 	 * Store the model matrix. This matrix is used to move models from object space (where each model can be thought
@@ -59,6 +65,9 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 	
 	/** Store the current rotation. */
 	private final float[] mCurrentRotation = new float[16];
+	
+	/** Store the current rotation. */
+	private final float[] mZoomMatrix = new float[16];
 	
 	/** A temporary matrix. */
 	private float[] mTemporaryMatrix = new float[16];
@@ -143,12 +152,33 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 	/** The current cubes object. */
 	private Cubes mCubes;
 	
+	
+	/** Filename of data to be read in */
+	private static String mFilename;
+	
+	/** This will be used to pass in model slider information. */
+	private int mAlphaHandle;
+	private int mMinHandle;
+	private int mMaxHandle;
+	private int mDistHandle;
+	private int mStepsHandle;
+	private int mZoomHandle;
+	
+	/**
+	 * values that are passed into the shader
+	 */
+	private static float mAlpha = 1.0f;
+	private static float mMin = 0.0f;
+	private static float mMax = 1.0f;
+	private static float mSteps = 100.0f;
+	private static float mDist  = 100.0f;
+	private static float mZoom = 1.0f;
 
 	/**
 	 * Initialize the model data.
 	 */
-	public HeadRenderer(final HeadActivity headActivity, final GLSurfaceView glSurfaceView) {
-		mHeadActivity = headActivity;	
+	public RawRenderer(final RawActivity rawActivity, final GLSurfaceView glSurfaceView) {
+		mRawActivity = rawActivity;	
 		mGlSurfaceView = glSurfaceView;
 	}
 
@@ -285,8 +315,8 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 				int cubePositionDataOffset = 0;
 									
 				final int segments = mRequestedCubeFactor + (mRequestedCubeFactor - 1);
-				final float minPosition = -1.0f;
-				final float maxPosition = 1.0f;
+				final float minPosition = -0.5f;
+				final float maxPosition = 0.5f;
 				final float positionRange = maxPosition - minPosition;
 				
 				for (int x = 0; x < mRequestedCubeFactor; x++) {
@@ -344,10 +374,10 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 							// Not supposed to manually call this, but Dalvik sometimes needs some additional prodding to clean up the heap.
 							System.gc();
 							
-							mHeadActivity.runOnUiThread(new Runnable() {							
+							mRawActivity.runOnUiThread(new Runnable() {							
 								@Override
 								public void run() {
-//									Toast.makeText(mHeadActivity, "Out of memory; Dalvik takes a while to clean up the memory. Please try again.\nExternal bytes allocated=" + dalvik.system.VMRuntime.getRuntime().getExternalBytesAllocated(), Toast.LENGTH_LONG).show();								
+//									Toast.makeText(mRawActivity, "Out of memory; Dalvik takes a while to clean up the memory. Please try again.\nExternal bytes allocated=" + dalvik.system.VMRuntime.getRuntime().getExternalBytesAllocated(), Toast.LENGTH_LONG).show();								
 								}
 							});										
 						}																	
@@ -357,10 +387,10 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 				// Not supposed to manually call this, but Dalvik sometimes needs some additional prodding to clean up the heap.
 				System.gc();
 				
-				mHeadActivity.runOnUiThread(new Runnable() {							
+				mRawActivity.runOnUiThread(new Runnable() {							
 					@Override
 					public void run() {
-//						Toast.makeText(mHeadActivity, "Out of memory; Dalvik takes a while to clean up the memory. Please try again.\nExternal bytes allocated=" + dalvik.system.VMRuntime.getRuntime().getExternalBytesAllocated(), Toast.LENGTH_LONG).show();								
+//						Toast.makeText(mRawActivity, "Out of memory; Dalvik takes a while to clean up the memory. Please try again.\nExternal bytes allocated=" + dalvik.system.VMRuntime.getRuntime().getExternalBytesAllocated(), Toast.LENGTH_LONG).show();								
 					}
 				});
 			}			
@@ -417,12 +447,12 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 		// Position the eye in front of the origin.
 		final float eyeX = 0.0f;
 		final float eyeY = 0.0f;
-		final float eyeZ = -3.0f;
+		final float eyeZ = 10.0f;
 
 		// We are looking toward the distance
 		final float lookX = 0.0f;
 		final float lookY = 0.0f;
-		final float lookZ = 5.0f;
+		final float lookZ = 1.0f;
 
 		// Set our up vector. This is where our head would be pointing were we holding the camera.
 		final float upX = 0.0f;
@@ -434,8 +464,8 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 		// view matrix. In OpenGL 2, we can keep track of these matrices separately if we choose.
 		Matrix.setLookAtM(mViewMatrix, 0, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ);		
 
-		final String vertexShader = RawResourceReader.readTextFileFromRawResource(mHeadActivity, R.raw.lesson_seven_vertex_shader);   		
- 		final String fragmentShader = RawResourceReader.readTextFileFromRawResource(mHeadActivity, R.raw.lesson_seven_fragment_shader);
+		final String vertexShader = RawResourceReader.readTextFileFromRawResource(mRawActivity, R.raw.head_vertex_shader);   		
+ 		final String fragmentShader = RawResourceReader.readTextFileFromRawResource(mRawActivity, R.raw.head_fragment_shader);
  				
 		final int vertexShaderHandle = ShaderHelper.compileShader(GLES30.GL_VERTEX_SHADER, vertexShader);		
 		final int fragmentShaderHandle = ShaderHelper.compileShader(GLES30.GL_FRAGMENT_SHADER, fragmentShader);		
@@ -443,27 +473,7 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 		mProgramHandle = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, 
 				new String[] {"a_Position",  "a_Normal", "a_TexCoordinate"});		            
         
-		// Load the texture
-		//mAndroidDataHandle = TextureHelper.loadTexture(mHeadActivity, R.drawable.usb_android);
-		/*
-		 * 2D custom texture example
-		 /
-		mAndroidDataHandle = TextureHelper.createSimpleTexture2D();		
-		GLES30.glBindTexture(GLES30.GL_TEXTURE_3D, mAndroidDataHandle);		
-		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);		
-		
-		GLES30.glBindTexture(GLES30.GL_TEXTURE_3D, mAndroidDataHandle);		
-		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR);
-
-		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE);
-		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE);
-		*/
-		
-		/*
-		 * 3D custom texture example
-		 */
-		mAndroidDataHandle = TextureHelper.createSimpleTexture3D();	
-		
+		// Load the texture		
 		mAndroidDataHandle = createHead3DTexture(256);	
 		
 		GLES30.glBindTexture(GLES30.GL_TEXTURE_3D, mAndroidDataHandle);		
@@ -494,10 +504,11 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 		final float bottom = -1.0f;
 		final float top = 1.0f;
 		final float near = 1.0f;
-		final float far = 1000.0f;
+		final float far = 100.0f;
 		
 		//Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
-		Matrix.perspectiveM(mProjectionMatrix, 0, 90, ratio, near, far);
+		Matrix.orthoM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
+		//Matrix.perspectiveM(mProjectionMatrix, 0, 90, ratio, near, far);
 	}	
 
 	@Override
@@ -517,7 +528,15 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
         mTextureUniformHandle = GLES30.glGetUniformLocation(mProgramHandle, "u_Texture");
         mPositionHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_Position");        
         mNormalHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_Normal"); 
-        mTextureCoordinateHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_TexCoordinate");
+        mTextureCoordinateHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_TexCoordinate");        
+
+        mAlphaHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uAmax");
+        mMaxHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uMax");
+        mMinHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uMin");
+        mDistHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uDist");
+        mStepsHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uNumSteps");
+
+        mZoomHandle    = GLES30.glGetUniformLocation(mProgramHandle, "u_Zoom");
         
         // Calculate position of the light. Push into the distance.
         Matrix.setIdentityM(mLightModelMatrix, 0);                     
@@ -544,6 +563,12 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
     	    	
         // Rotate the cube taking the overall rotation into account.     	
     	Matrix.multiplyMM(mTemporaryMatrix, 0, mModelMatrix, 0, mAccumulatedRotation, 0);
+    	System.arraycopy(mTemporaryMatrix, 0, mModelMatrix, 0, 16);   
+
+    	// Scale the cube  
+    	Matrix.setIdentityM(mZoomMatrix, 0);
+    	Matrix.scaleM(mZoomMatrix, 0, mZoom, mZoom, mZoom); 	
+    	Matrix.multiplyMM(mTemporaryMatrix, 0, mModelMatrix, 0, mZoomMatrix, 0);
     	System.arraycopy(mTemporaryMatrix, 0, mModelMatrix, 0, 16);   
     	
     	// This multiplies the view matrix by the model matrix, and stores
@@ -588,7 +613,15 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
 		// Tell the texture uniform sampler to use this texture in the
 		// shader by binding to texture unit 0.
 		GLES30.glUniform1i(mTextureUniformHandle, 0);
-        
+		
+		//Send in all slider info
+		GLES30.glUniform1f(mAlphaHandle, mAlpha);
+		GLES30.glUniform1f(mMaxHandle, mMax);
+		GLES30.glUniform1f(mMinHandle, mMin);
+		GLES30.glUniform1f(mStepsHandle, mSteps);
+		GLES30.glUniform1f(mDistHandle, mDist);
+		GLES30.glUniform1f(mZoomHandle, mZoom);
+
 		if (mCubes != null) {
 			mCubes.render();
 		}
@@ -725,21 +758,108 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
     public static int createHead3DTexture(int size)
     {
         // Texture object handle
-        int[] textureId = new int[1];
+        int[] textureId = new int[1];             
         
-        
-        AssetManager assman = mHeadActivity.getAssets();
+
+		int dim[] = new int[3];
+		int ratio[] = new int[3];
+        //Read in the .dat file for data dimensions
         try {
-			String fileList[] = assman.list("head");
-			
-			int x = 0;
+			File file = new File(mFilename + ".dat");
+			FileReader fileReader = new FileReader(file);
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
+			StringBuffer stringBuffer = new StringBuffer();
+			String line;
+			//dimensions of the data
+			int count = 0;
+			int count2 = 0;
+			while ((line = bufferedReader.readLine()) != null) {
+				if(count < 3)
+					dim[count++] = Integer.parseInt(line);
+				else
+					ratio[count2++] = Integer.parseInt(line);				
+			}
+			fileReader.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
         
-        ByteBuffer pixelBuffer = ByteBuffer.allocateDirect(size*size*size);
-        //pixelBuffer.put(pixels).position(0);
+        //Read in the .raw file (binary file)
+        File file = new File(mFilename);
+        byte[] result = new byte[(int)file.length()];
+        try {
+          InputStream input = null;
+          try {
+            int totalBytesRead = 0;
+            input = new BufferedInputStream(new FileInputStream(file));
+            while(totalBytesRead < result.length){
+              int bytesRemaining = result.length - totalBytesRead;
+              //input.read() returns -1, 0, or more :
+              int bytesRead = input.read(result, totalBytesRead, bytesRemaining); 
+              if (bytesRead > 0){
+                totalBytesRead = totalBytesRead + bytesRead;
+              }
+            }
+            
+          }
+          finally {
+            input.close();
+          }
+        }
+        catch (FileNotFoundException ex) {
+        	
+        }
+        catch (IOException ex) {
+        	
+        }
+        
+        ByteBuffer pixelPad, pixelBuffer;
+        int width, height, depth;
+        
+        //If the data is needing padding in the z direction  
+        float dimRatio = ((float)dim[1]/(float)dim[2]);
+        float highEndRatio = (float) (ratio[2] + .1);
+        float lowEndRatio = (float) (ratio[2] - .1);
+        
+        if(dimRatio >= highEndRatio || dimRatio  <= lowEndRatio)
+        {
+        	
+        	//Find out how much padding is needed
+        	int paddingNeeded = (dim[1] / ratio[2]) - dim[2];
+        	
+        	//Don't want to mess with negative padding right now...
+        	if(paddingNeeded < 0)
+        	{
+        		pixelBuffer = ByteBuffer.allocateDirect(result.length);
+                pixelBuffer.put(result).position(0);
+                width = dim[0];
+                height = dim[1];
+                depth = dim[2];
+        	}
+        	else
+        	{
+	        	pixelPad = ByteBuffer.allocateDirect(dim[0] * dim[1] * paddingNeeded/2);
+	            pixelBuffer = ByteBuffer.allocateDirect(dim[0] * dim[0] * dim[0]);
+	            pixelBuffer.put(pixelPad);
+	            pixelBuffer.put(result).position(0);
+	            
+	            width = dim[0];
+	            height = dim[1];
+	            depth = paddingNeeded + dim[2];
+        	}
+        }
+        
+        else
+        {
+        	pixelBuffer = ByteBuffer.allocateDirect(result.length);
+            pixelBuffer.put(result).position(0);
+            width = dim[0];
+            height = dim[1];
+            depth = dim[2];
+        }
+        
+        
 
         // Use tightly packed data
         GLES30.glPixelStorei ( GLES30.GL_UNPACK_ALIGNMENT, 1 );
@@ -751,12 +871,41 @@ public class HeadRenderer implements GLSurfaceView.Renderer {
         GLES30.glBindTexture ( GLES30.GL_TEXTURE_3D, textureId[0] );
 
         //  Load the texture
-        GLES30.glTexImage3D ( GLES30.GL_TEXTURE_3D, 0, GLES30.GL_R8, size, size, size, 0, GLES30.GL_RED, GLES30.GL_UNSIGNED_BYTE, pixelBuffer );
+        GLES30.glTexImage3D ( GLES30.GL_TEXTURE_3D, 0, GLES30.GL_R8, width, height, depth, 0, GLES30.GL_RED, GLES30.GL_UNSIGNED_BYTE, pixelBuffer );
 
         // Set the filtering mode
         GLES30.glTexParameteri ( GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_NEAREST );
         GLES30.glTexParameteri ( GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_NEAREST );
-
+        
         return textureId[0];        
+    }
+    
+    public void setAlpha(float alpha)
+    {
+    	mAlpha = alpha;
+    }
+    public void setMin(float min)
+    {
+    	mMin = min;
+    }
+    public void setMax(float max)
+    {
+    	mMax = max;
+    }
+    public void setDist(float dist)
+    {
+    	mDist = dist;
+    }
+    public void setSteps(float steps)
+    {
+    	mSteps = steps;
+    }
+    public void setZoom(float zoom)
+    {
+    	mZoom = zoom;
+    }
+    public void setFilename(String filename)
+    {
+    	mFilename = filename;
     }
 }

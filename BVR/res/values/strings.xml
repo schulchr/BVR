@@ -6,10 +6,12 @@
     <string name="heatmap">Sample Volume: Heatmap</string>  
     <string name="heatmap_subtitle">This sample creates a 3D texture of a heatmap from an equation.</string>
     <string name="head">Sample Volume: Scanned Head</string>  
+    <string name="head_subtitle">This sample gathers 3D data via images. Volume data retrieved from The Stanford Volume Data Archive</string>
+    <string name="raw">Raw File</string>  
+    <string name="raw_subtitle">Read in a 8-bit binary file containing voxel data</string>
     <string name="alpha">Alpha</string>  
     <string name="min">Min</string>  
     <string name="max">Max</string>  
     <string name="dist">Dist</string>  
     <string name="steps">Steps</string>
-    <string name="head_subtitle">This sample gathers 3D data via images. Volume data retrieved from The Stanford Volume Data Archive</string>
 </resources>

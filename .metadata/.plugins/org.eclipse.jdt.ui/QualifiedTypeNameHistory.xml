@@ -5,4 +5,8 @@
 <fullyQualifiedTypeName name="android.widget.SeekBar"/>
 <fullyQualifiedTypeName name="android.widget.SeekBar.OnSeekBarChangeListener"/>
 <fullyQualifiedTypeName name="com.bvr.android.R.id"/>
+<fullyQualifiedTypeName name="com.bvr.android.raw.RawActivity"/>
+<fullyQualifiedTypeName name="com.bvr.android.TableOfContents"/>
+<fullyQualifiedTypeName name="java.io.File"/>
+<fullyQualifiedTypeName name="java.io.BufferedInputStream"/>
 </qualifiedTypeNameHistroy>
