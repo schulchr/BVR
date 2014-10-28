@@ -163,6 +163,7 @@ public class RawRenderer implements GLSurfaceView.Renderer {
 	private int mDistHandle;
 	private int mStepsHandle;
 	private int mZoomHandle;
+	private int mLightHandle;
 	
 	/**
 	 * values that are passed into the shader
@@ -173,6 +174,7 @@ public class RawRenderer implements GLSurfaceView.Renderer {
 	private static float mSteps = 100.0f;
 	private static float mDist  = 100.0f;
 	private static float mZoom = 1.0f;
+	private static float mLight = 0.0f;
 
 	/**
 	 * Initialize the model data.
@@ -464,8 +466,8 @@ public class RawRenderer implements GLSurfaceView.Renderer {
 		// view matrix. In OpenGL 2, we can keep track of these matrices separately if we choose.
 		Matrix.setLookAtM(mViewMatrix, 0, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ);		
 
-		final String vertexShader = RawResourceReader.readTextFileFromRawResource(mRawActivity, R.raw.head_vertex_shader);   		
- 		final String fragmentShader = RawResourceReader.readTextFileFromRawResource(mRawActivity, R.raw.head_fragment_shader);
+		final String vertexShader = RawResourceReader.readTextFileFromRawResource(mRawActivity, R.raw.raw_vertex_shader);   		
+ 		final String fragmentShader = RawResourceReader.readTextFileFromRawResource(mRawActivity, R.raw.raw_fragment_shader);
  				
 		final int vertexShaderHandle = ShaderHelper.compileShader(GLES30.GL_VERTEX_SHADER, vertexShader);		
 		final int fragmentShaderHandle = ShaderHelper.compileShader(GLES30.GL_FRAGMENT_SHADER, fragmentShader);		
@@ -487,7 +489,10 @@ public class RawRenderer implements GLSurfaceView.Renderer {
 		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_WRAP_R, GLES30.GL_CLAMP_TO_EDGE);
 		
         // Initialize the accumulated rotation matrix
-        Matrix.setIdentityM(mAccumulatedRotation, 0);        
+        Matrix.setIdentityM(mAccumulatedRotation, 0);  
+        
+        //reset everything
+        resetValues();
 	}	
 		
 	@Override
@@ -535,12 +540,12 @@ public class RawRenderer implements GLSurfaceView.Renderer {
         mMinHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uMin");
         mDistHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uDist");
         mStepsHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uNumSteps");
-
+        mLightHandle   = GLES30.glGetUniformLocation(mProgramHandle, "uLightToggle");
         mZoomHandle    = GLES30.glGetUniformLocation(mProgramHandle, "u_Zoom");
         
         // Calculate position of the light. Push into the distance.
         Matrix.setIdentityM(mLightModelMatrix, 0);                     
-        Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, -1.0f);
+        Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, 1.0f);
                
         Matrix.multiplyMV(mLightPosInWorldSpace, 0, mLightModelMatrix, 0, mLightPosInModelSpace, 0);
         Matrix.multiplyMV(mLightPosInEyeSpace, 0, mViewMatrix, 0, mLightPosInWorldSpace, 0);                      
@@ -621,6 +626,7 @@ public class RawRenderer implements GLSurfaceView.Renderer {
 		GLES30.glUniform1f(mStepsHandle, mSteps);
 		GLES30.glUniform1f(mDistHandle, mDist);
 		GLES30.glUniform1f(mZoomHandle, mZoom);
+		GLES30.glUniform1f(mLightHandle, mLight);
 
 		if (mCubes != null) {
 			mCubes.render();
@@ -907,5 +913,19 @@ public class RawRenderer implements GLSurfaceView.Renderer {
     public void setFilename(String filename)
     {
     	mFilename = filename;
+    }
+    public void setLightToggle(float toggle)
+    {
+    	mLight = toggle;
+    }
+    public void resetValues()
+    {
+    	mAlpha = 1.0f;
+    	mMin = 0.0f;
+    	mMax = 1.0f;
+    	mSteps = 100.0f;
+    	mDist  = 100.0f;
+    	mZoom = 1.0f;
+    	mLight = 0.0f;
     }
 }

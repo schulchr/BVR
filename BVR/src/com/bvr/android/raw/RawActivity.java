@@ -7,8 +7,12 @@ import android.content.Intent;
 import android.content.pm.ConfigurationInfo;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.Toast;
 
 import com.bvr.android.R;
 import com.bvr.android.TableOfContents;
@@ -164,6 +168,24 @@ public class RawActivity extends Activity {
 				}
 
 			  });  
+		CheckBox checkBox = (CheckBox) findViewById(R.id.checkBox1);
+		 
+		checkBox.setOnClickListener(new OnClickListener() {
+	 
+		  @Override
+		  public void onClick(View v) {
+			  
+			if (((CheckBox) v).isChecked()) 
+			{
+				mRenderer.setLightToggle(1.0f);
+			}
+			else
+			{
+				mRenderer.setLightToggle(0.0f);
+			}
+	 
+		  }
+		});
 		
 		//Set the filename for the file to be read in
 
