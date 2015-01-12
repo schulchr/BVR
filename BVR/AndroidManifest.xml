@@ -42,7 +42,10 @@
         <activity
             android:name=".raw.RawActivity"
             android:label="@string/raw" />
-
+		
+         <activity
+            android:name=".grid.GridActivity"
+            android:label="@string/grid" />
         
     </application>
 

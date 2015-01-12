@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.SimpleAdapter;
 
+import com.bvr.android.grid.GridActivity;
 import com.bvr.android.head.HeadActivity;
 import com.bvr.android.heatmap.HeatMapActivity;
 import com.bvr.android.raw.RawActivity;
@@ -42,6 +43,16 @@ public class TableOfContents extends ListActivity
 		final SparseArray<Class<? extends Activity>> activityMapping = new SparseArray<Class<? extends Activity>>();
 		
 		int i = 0;
+		
+		{
+			final Map<String, Object> item = new HashMap<String, Object>();
+			item.put(ITEM_IMAGE, R.drawable.teddybear);
+			item.put(ITEM_TITLE, getText(R.string.grid));
+			item.put(ITEM_SUBTITLE, getText(R.string.grid_subtitle));
+			data.add(item);
+			activityMapping.put(i++, GridActivity.class);
+		}
+		
 		{
 			final Map<String, Object> item = new HashMap<String, Object>();
 			item.put(ITEM_IMAGE, R.drawable.teddybear);
@@ -115,6 +126,48 @@ public class TableOfContents extends ListActivity
 						    //Send this text to the new activity
 							Intent intent = new Intent(TableOfContents.this, RawActivity.class);
 							String filename = sdcard.getPath() + "/raw/" + txtFiles.get(which);
+							intent.putExtra(EXTRA_MESSAGE, filename);
+							startActivity(intent);									
+						}
+					});
+					
+					AlertDialog alert = builder.create();
+					alert.show();
+					
+				}
+				else if(activityToLaunch.getName().equals("com.bvr.android.grid.GridActivity"))
+				{
+					//Launch an alert window to allow user to select the file they want to view
+					String dirName = Environment.getExternalStorageDirectory().toString() + "/grid/";
+					
+					File dir = new File(dirName);
+					
+					String[] fileNames = dir.list();
+					final ArrayList<String> txtFiles = new ArrayList<String>();
+					
+					for (int i=0; i < fileNames.length; i++)
+					{
+					    if(fileNames[i].matches(".*?[.]grid$"))
+					    {
+					    	txtFiles.add(fileNames[i]);
+					    }
+					}
+					
+					AlertDialog.Builder builder = new AlertDialog.Builder(TableOfContents.this);
+					builder.setTitle("Load a GRID file");
+					
+					CharSequence[] items = txtFiles.toArray(new CharSequence[txtFiles.size()]);
+					
+					builder.setItems(items, new DialogInterface.OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							
+							File sdcard = Environment.getExternalStorageDirectory();					
+										    
+						    //Send this text to the new activity
+							Intent intent = new Intent(TableOfContents.this, GridActivity.class);
+							String filename = sdcard.getPath() + "/grid/" + txtFiles.get(which);
 							intent.putExtra(EXTRA_MESSAGE, filename);
 							startActivity(intent);									
 						}

@@ -10,4 +10,6 @@
 <fullyQualifiedTypeName name="java.io.BufferedInputStream"/>
 <fullyQualifiedTypeName name="com.bvr.android.R.id"/>
 <fullyQualifiedTypeName name="android.view.View.OnClickListener"/>
+<fullyQualifiedTypeName name="com.bvr.android.grid.GridRenderer"/>
+<fullyQualifiedTypeName name="com.bvr.android.grid.GridActivity"/>
 </qualifiedTypeNameHistroy>

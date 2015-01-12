@@ -3,32 +3,36 @@
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
 		<item value="257" key="DIALOG_WIDTH"/>
 		<item value="380" key="DIALOG_Y_ORIGIN"/>
-		<item value="381" key="DIALOG_HEIGHT"/>
 		<item value="1110" key="DIALOG_X_ORIGIN"/>
+		<item value="381" key="DIALOG_HEIGHT"/>
 		<item value="1|Segoe UI|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI" key="DIALOG_FONT_NAME"/>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="true" key="wrap"/>
+		<item value="true" key="casesensitive"/>
 		<item value="false" key="isRegEx"/>
-		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
-		<item value="false" key="wholeword"/>
-		<item value="light" key="selection"/>
+		<item value="true" key="wholeword"/>
+		<item value="mFilename" key="selection"/>
 		<list key="findhistory">
-			<item value="light"/>
-			<item value="mLight"/>
-			<item value="lightPosition"/>
-			<item value="shader"/>
-			<item value="mHead"/>
-			<item value="Head"/>
-			<item value="pixels"/>
-			<item value="Context"/>
+			<item value="mFilename"/>
+			<item value="intent"/>
+			<item value=".raw"/>
+			<item value="RawGLSurfaceView"/>
+			<item value="RawRenderer"/>
+			<item value="RawActivity"/>
+			<item value="mRawActivity"/>
+			<item value="Raw"/>
 		</list>
 		<list key="replacehistory">
+			<item value="GridRenderer"/>
+			<item value="GridGLSurfaceView"/>
+			<item value="GridActivity"/>
+			<item value="mGridActivity"/>
+			<item value="Grid"/>
 			<item value="mRaw"/>
 			<item value="Raw"/>
 			<item value="Head"/>
-			<item value="mHeatMapActivity"/>
 		</list>
 	</section>
 </section>
