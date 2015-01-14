@@ -40,8 +40,11 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	
 	/**
 	 * The grid points from the GRID file
+	 * and other information related to it
 	 */
 	static GridGridpoint[] gridPoints;
+	static int gridWidth, gridHeight, gridDepth;
+	static int gridTexWidth, gridTexHeight, gridTexDepth;
 	
 	/**
 	 * Store the model matrix. This matrix is used to move models from object space (where each model can be thought
@@ -479,8 +482,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		mProgramHandle = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, 
 				new String[] {"a_Position",  "a_Normal", "a_TexCoordinate"});		            
         
-		// Load the texture		
-		mAndroidDataHandle = createHead3DTexture(256);	
+		//choose which textures to load in here
 		
 		GLES30.glBindTexture(GLES30.GL_TEXTURE_3D, mAndroidDataHandle);		
 		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);		
@@ -762,17 +764,11 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		}
 	}
 	
-	 //
-    // Create a head 3D texture. Is a single channel texture 
+	//
+    // Read in the GRID file to populate the grid points 
     //
-    public static int createHead3DTexture(int size)
+    public static void readGridFile(int size)
     {
-        // Texture object handle
-        int[] textureId = new int[1];             
-        
-
-		int dim[] = new int[3];
-		int ratio[] = new int[3];
         //Read in the .grid file for data information
         try {
 			File file = new File(mFilename);
@@ -784,11 +780,31 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 			//grab the dimensions of the grid. 
 			line = bufferedReader.readLine();
 			String[] split = line.split(" ");			
-			int numPoints = Integer.parseInt(split[1]);
+			gridWidth = Integer.parseInt(split[1]);
 			
+			line = bufferedReader.readLine();
+			split = line.split(" ");			
+			gridHeight = Integer.parseInt(split[1]);
+			
+			line = bufferedReader.readLine();
+			split = line.split(" ");			
+			gridDepth = Integer.parseInt(split[1]);
+			
+			//grab the dimensions each texture inside the grid. 
+			line = bufferedReader.readLine();
+			split = line.split(" ");			
+			gridTexWidth = Integer.parseInt(split[1]);
+			
+			line = bufferedReader.readLine();
+			split = line.split(" ");			
+			gridTexHeight = Integer.parseInt(split[1]);
+			
+			line = bufferedReader.readLine();
+			split = line.split(" ");			
+			gridTexDepth = Integer.parseInt(split[1]);
 			
 			//setup the array for the number of gridpoints
-			gridPoints = new GridGridpoint[numPoints];
+			gridPoints = new GridGridpoint[gridWidth * gridHeight * gridDepth];
 			
 			int count = 0;
 			while((line = bufferedReader.readLine()) != null){
@@ -843,101 +859,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-        
-        //Read in the .raw file (binary file)
-        File file = new File(mFilename);
-        byte[] result = new byte[(int)file.length()];
-        try {
-          InputStream input = null;
-          try {
-            int totalBytesRead = 0;
-            input = new BufferedInputStream(new FileInputStream(file));
-            while(totalBytesRead < result.length){
-              int bytesRemaining = result.length - totalBytesRead;
-              //input.read() returns -1, 0, or more :
-              int bytesRead = input.read(result, totalBytesRead, bytesRemaining); 
-              if (bytesRead > 0){
-                totalBytesRead = totalBytesRead + bytesRead;
-              }
-            }
-            
-          }
-          finally {
-            input.close();
-          }
-        }
-        catch (FileNotFoundException ex) {
-        	
-        }
-        catch (IOException ex) {
-        	
-        }
-        
-        ByteBuffer pixelPad, pixelBuffer;
-        int width, height, depth;
-        
-        //If the data is needing padding in the z direction  
-        float dimRatio = ((float)dim[1]/(float)dim[2]);
-        float highEndRatio = (float) (ratio[2] + .1);
-        float lowEndRatio = (float) (ratio[2] - .1);
-        
-        if(dimRatio >= highEndRatio || dimRatio  <= lowEndRatio)
-        {
-        	
-        	//Find out how much padding is needed
-        	int paddingNeeded = (dim[1] / ratio[2]) - dim[2];
-        	
-        	//Don't want to mess with negative padding right now...
-        	if(paddingNeeded < 0)
-        	{
-        		pixelBuffer = ByteBuffer.allocateDirect(result.length);
-                pixelBuffer.put(result).position(0);
-                width = dim[0];
-                height = dim[1];
-                depth = dim[2];
-        	}
-        	else
-        	{
-	        	pixelPad = ByteBuffer.allocateDirect(dim[0] * dim[1] * paddingNeeded/2);
-	            pixelBuffer = ByteBuffer.allocateDirect(dim[0] * dim[0] * dim[0]);
-	            pixelBuffer.put(pixelPad);
-	            pixelBuffer.put(result).position(0);
-	            
-	            width = dim[0];
-	            height = dim[1];
-	            depth = paddingNeeded + dim[2];
-        	}
-        }
-        
-        else
-        {
-        	pixelBuffer = ByteBuffer.allocateDirect(result.length);
-            pixelBuffer.put(result).position(0);
-            width = dim[0];
-            height = dim[1];
-            depth = dim[2];
-        }
-        
-        
-
-        // Use tightly packed data
-        GLES30.glPixelStorei ( GLES30.GL_UNPACK_ALIGNMENT, 1 );
-
-        //  Generate a texture object
-        GLES30.glGenTextures ( 1, textureId, 0 );
-
-        // Bind the texture object
-        GLES30.glBindTexture ( GLES30.GL_TEXTURE_3D, textureId[0] );
-
-        //  Load the texture
-        GLES30.glTexImage3D ( GLES30.GL_TEXTURE_3D, 0, GLES30.GL_R8, width, height, depth, 0, GLES30.GL_RED, GLES30.GL_UNSIGNED_BYTE, pixelBuffer );
-
-        // Set the filtering mode
-        GLES30.glTexParameteri ( GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_NEAREST );
-        GLES30.glTexParameteri ( GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_NEAREST );
-        
-        return textureId[0];        
+              
     }
     
     public void setAlpha(float alpha)
