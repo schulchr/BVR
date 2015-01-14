@@ -45,7 +45,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	static GridGridpoint[] gridPoints;
 	static int gridWidth, gridHeight, gridDepth;
 	static int gridTexWidth, gridTexHeight, gridTexDepth;
-	
+	static GridDataCamera gridCamera;
 	/**
 	 * Store the model matrix. This matrix is used to move models from object space (where each model can be thought
 	 * of being located at the center of the universe) to world space.
@@ -482,7 +482,20 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		mProgramHandle = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, 
 				new String[] {"a_Position",  "a_Normal", "a_TexCoordinate"});		            
         
+		//setup grid points
+		readGridFile();
+		
+		//setup grid camera
+		float lengthX = (2.0f) / (float) (gridWidth - 1);
+		float lengthY = (2.0f) / (float) (gridHeight - 1);
+		float lengthZ = (2.0f) / (float) (gridDepth - 1);
+		//GridDataCamera(float f, float n, float l, float r, float t, float b)
+		gridCamera = new GridDataCamera(1.5f * lengthZ, 0.0f, .5f * lengthX, .5f * lengthX, .75f*lengthY, .75f*lengthY);
+		
+		gridCamera.updateLocation(1, 1, 1);
+		
 		//choose which textures to load in here
+		setGridTextures();
 		
 		GLES30.glBindTexture(GLES30.GL_TEXTURE_3D, mAndroidDataHandle);		
 		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);		
@@ -767,7 +780,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	//
     // Read in the GRID file to populate the grid points 
     //
-    public static void readGridFile(int size)
+    public static void readGridFile()
     {
         //Read in the .grid file for data information
         try {
@@ -862,6 +875,30 @@ public class GridRenderer implements GLSurfaceView.Renderer {
               
     }
     
+    /**
+     * This will loop through all the grid points and figure out which textures to use. 
+     * Right now, this will just brute force the entire list of grid points. This can be optimized with the 
+     */
+    public void setGridTextures()
+    {
+    	gridCamera.updateViewVolume();
+    	
+    	for(int i = 0; i < gridPoints.length; i++)
+    	{
+    		
+    		if(gridCamera.isInsideView(gridPoints[i]))
+    		{
+    			loadGridTextures(gridPoints[i]);
+    			return;
+    		}
+    		    			
+    	}
+    }
+    
+    public void loadGridTextures(GridGridpoint point)
+    {
+    	
+    }
     public void setAlpha(float alpha)
     {
     	mAlpha = alpha;

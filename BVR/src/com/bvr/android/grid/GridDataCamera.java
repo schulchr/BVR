@@ -1,8 +1,8 @@
 package com.bvr.android.grid;
 
 public class GridDataCamera {
-	int[] loc = new int[3]; //location of the camera
-	int[] dir = new int[3]; //direction that the camera is looking at
+	float[] loc = new float[3]; //location of the camera
+	float[] dir = new float[3]; //direction that the camera is looking at
 	
 	//View volume information of the camera
 	float far, near;
@@ -15,7 +15,7 @@ public class GridDataCamera {
 	float[] ad = new float[3];
 	float[] ae = new float[3];
 	
-	public GridDataCamera()
+	public GridDataCamera(float f, float n, float l, float r, float t, float b)
 	{
 		loc[0] = 0;
 		loc[1] = 0;
@@ -24,6 +24,13 @@ public class GridDataCamera {
 		dir[0] = 0;
 		dir[1] = 0;
 		dir[2] = -1;
+		
+		far = f;
+		near = n;
+		left = l;
+		right = r;
+		top = t;
+		bottom = b;		
 	}
 	
 	
@@ -72,13 +79,13 @@ public class GridDataCamera {
 		dir[2] /= camDirLength;
 		
 		//Find vectors perpendicular to the camera
-		perpDirY[0] = -dir[1];
-		perpDirY[1] = dir[0];
-		perpDirY[2] = dir[2];
+		float up[] = new float[3];//up vector
+		up[0] = 0;
+		up[1] = 1;
+		up[2] = 0;
 		
-		perpDirZ[0] = -dir[2];
-		perpDirZ[1] = dir[1];
-		perpDirZ[2] = dir[0];
+		perpDirZ = crossProd(up, dir);
+		perpDirY = crossProd(dir,perpDirZ);
 		
 		//update the 4 points that define the view volume
 		//Consult the notebook to get a better visual representation of what's going on
@@ -91,13 +98,13 @@ public class GridDataCamera {
 		b[1] = loc[1] + dir[1] * far + perpDirZ[1] * left + -perpDirY[1] * bottom;
 		b[2] = loc[2] + dir[2] * far + perpDirZ[2] * left + -perpDirY[2] * bottom;
 		
-		d[0] = loc[0] + dir[0] * near + perpDirZ[0] * right + -perpDirY[0] * bottom;
-		d[1] = loc[1] + dir[1] * near + perpDirZ[1] * right + -perpDirY[1] * bottom;
-		d[2] = loc[2] + dir[2] * near + perpDirZ[2] * right + -perpDirY[2] * bottom;
+		d[0] = loc[0] + dir[0] * near - perpDirZ[0] * right + -perpDirY[0] * bottom;
+		d[1] = loc[1] + dir[1] * near - perpDirZ[1] * right + -perpDirY[1] * bottom;
+		d[2] = loc[2] + dir[2] * near - perpDirZ[2] * right + -perpDirY[2] * bottom;
 		
-		e[0] = loc[0] + dir[0] * near + perpDirZ[0] * left + -perpDirY[0] * top;
-		e[1] = loc[1] + dir[1] * near + perpDirZ[1] * left + -perpDirY[1] * top;
-		e[2] = loc[2] + dir[2] * near + perpDirZ[2] * left + -perpDirY[2] * top;
+		e[0] = loc[0] + dir[0] * near + perpDirZ[0] * left + perpDirY[0] * top;
+		e[1] = loc[1] + dir[1] * near + perpDirZ[1] * left + perpDirY[1] * top;
+		e[2] = loc[2] + dir[2] * near + perpDirZ[2] * left + perpDirY[2] * top;
 		
 		//Create the 3 vectors defining the volume
 		ab[0] = b[0] - a[0];
@@ -114,11 +121,36 @@ public class GridDataCamera {
 		
 	}
 	
+	/**
+	 * Will update the location of the camera and also make the direction point to the center, for now.
+	 */
+	public void updateLocation(float x, float y, float z)
+	{
+		loc[0] = x;
+		loc[1] = y;
+		loc[2] = z;
+		
+		dir[0] = 0 - x;
+		dir[1] = 0 - y;
+		dir[2] = 0 - z;
+	}
+	
 	public float dotProd(float[] a, float[] b)
 	{
 		float dot = a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 		if(-0.0001 < dot && dot < 0)
 			return 0;
 		return dot;
+	}
+	
+	public float[] crossProd(float[] a, float[] b)
+	{
+		float[] result = new float[3];		
+		
+		result[0] = a[1]*b[2] - a[2]*b[1];		
+		result[1] = a[2]*b[0] - a[0]*b[2];		
+		result[2] = a[0]*b[1] - a[1]*b[0];
+		
+		return result;
 	}
 }
