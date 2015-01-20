@@ -46,6 +46,8 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	static int gridWidth, gridHeight, gridDepth;
 	static int gridTexWidth, gridTexHeight, gridTexDepth;
 	static GridDataCamera gridCamera;
+	static int loadedTextures[];
+	static int loadedPoint;
 	/**
 	 * Store the model matrix. This matrix is used to move models from object space (where each model can be thought
 	 * of being located at the center of the universe) to world space.
@@ -100,7 +102,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	private int mLightPosHandle;
 	
 	/** This will be used to pass in the texture. */
-	private int mTextureUniformHandle;
+	private int mTextureUniformHandle[];
 	
 	/** This will be used to pass in model position information. */
 	private int mPositionHandle;
@@ -147,7 +149,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	private int mProgramHandle;
 	
 	/** These are handles to our texture data. */
-	private int mAndroidDataHandle;		
+	private int mAndroidDataHandle[] = new int[8];		
 	
 	// These still work without volatile, but refreshes are not guaranteed to happen.					
 	public volatile float mDeltaX;					
@@ -438,6 +440,8 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	@Override
 	public void onSurfaceCreated(GL10 glUnused, EGLConfig config) 
 	{		
+		loadedTextures = new int[8];
+		
 		mActualCubeFactor = 1;
 		generateCubes(mActualCubeFactor, true, true);			
 		
@@ -473,8 +477,8 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		// view matrix. In OpenGL 2, we can keep track of these matrices separately if we choose.
 		Matrix.setLookAtM(mViewMatrix, 0, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ);		
 
-		final String vertexShader = RawResourceReader.readTextFileFromRawResource(mGridActivity, R.raw.raw_vertex_shader);   		
- 		final String fragmentShader = RawResourceReader.readTextFileFromRawResource(mGridActivity, R.raw.raw_fragment_shader);
+		final String vertexShader = RawResourceReader.readTextFileFromRawResource(mGridActivity, R.raw.grid_vertex_shader);   		
+ 		final String fragmentShader = RawResourceReader.readTextFileFromRawResource(mGridActivity, R.raw.grid_fragment_shader);
  				
 		final int vertexShaderHandle = ShaderHelper.compileShader(GLES30.GL_VERTEX_SHADER, vertexShader);		
 		final int fragmentShaderHandle = ShaderHelper.compileShader(GLES30.GL_FRAGMENT_SHADER, fragmentShader);		
@@ -492,21 +496,11 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		//GridDataCamera(float f, float n, float l, float r, float t, float b)
 		gridCamera = new GridDataCamera(1.5f * lengthZ, 0.0f, .5f * lengthX, .5f * lengthX, .75f*lengthY, .75f*lengthY);
 		
-		gridCamera.updateLocation(1, 1, 1);
+		gridCamera.updateLocation(0, 1, 0);
 		
 		//choose which textures to load in here
 		setGridTextures();
-		
-		GLES30.glBindTexture(GLES30.GL_TEXTURE_3D, mAndroidDataHandle);		
-		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);		
-		
-		GLES30.glBindTexture(GLES30.GL_TEXTURE_3D, mAndroidDataHandle);		
-		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR);
-
-		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE);
-		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE);	
-		GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_WRAP_R, GLES30.GL_CLAMP_TO_EDGE);
-		
+				
         // Initialize the accumulated rotation matrix
         Matrix.setIdentityM(mAccumulatedRotation, 0);  
         
@@ -528,7 +522,9 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		final float bottom = -1.0f;
 		final float top = 1.0f;
 		final float near = 1.0f;
-		final float far = 100.0f;
+		final float far = 100.0f;		
+
+        mTextureUniformHandle = new int[8];
 		
 		//Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
 		Matrix.orthoM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
@@ -549,7 +545,18 @@ public class GridRenderer implements GLSurfaceView.Renderer {
         mMMatrixHandle = GLES30.glGetUniformLocation(mProgramHandle, "u_MMatrix");
         mVPMatrixHandle = GLES30.glGetUniformLocation(mProgramHandle, "u_VPMatrix"); 
         mLightPosHandle = GLES30.glGetUniformLocation(mProgramHandle, "u_LightPos");
-        mTextureUniformHandle = GLES30.glGetUniformLocation(mProgramHandle, "u_Texture");
+        
+                
+        mTextureUniformHandle[GridConstants.BLL_TEX] = GLES30.glGetUniformLocation(mProgramHandle, "u_Texture_BLL");
+        mTextureUniformHandle[GridConstants.BUL_TEX] = GLES30.glGetUniformLocation(mProgramHandle, "u_Texture_BUL");
+        mTextureUniformHandle[GridConstants.BLR_TEX] = GLES30.glGetUniformLocation(mProgramHandle, "u_Texture_BLR");
+        mTextureUniformHandle[GridConstants.BUR_TEX] = GLES30.glGetUniformLocation(mProgramHandle, "u_Texture_BUR");
+        
+        mTextureUniformHandle[GridConstants.TLL_TEX] = GLES30.glGetUniformLocation(mProgramHandle, "u_Texture_TLL");
+        mTextureUniformHandle[GridConstants.TLR_TEX] = GLES30.glGetUniformLocation(mProgramHandle, "u_Texture_TLR");
+        mTextureUniformHandle[GridConstants.TUL_TEX] = GLES30.glGetUniformLocation(mProgramHandle, "u_Texture_TUL");
+        mTextureUniformHandle[GridConstants.TUR_TEX] = GLES30.glGetUniformLocation(mProgramHandle, "u_Texture_TUR");               
+        
         mPositionHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_Position");        
         mNormalHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_Normal"); 
         mTextureCoordinateHandle = GLES30.glGetAttribLocation(mProgramHandle, "a_TexCoordinate");        
@@ -627,17 +634,26 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		// Pass in the light position in eye space.
 		GLES30.glUniform3f(mLightPosHandle, mLightPosInEyeSpace[0], mLightPosInEyeSpace[1], mLightPosInEyeSpace[2]);
 		
-		// Pass in the texture information
-		// Set the active texture unit to texture unit 0.
-		GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
-
-		// Bind the texture to this unit.
-		GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, mAndroidDataHandle);
-
-		// Tell the texture uniform sampler to use this texture in the
-		// shader by binding to texture unit 0.
-		GLES30.glUniform1i(mTextureUniformHandle, 0);
+		setGridTextures();
 		
+		// Pass in the texture information for each of the loaded in textures
+		for(int i = 0; i < 8; i++)
+		{
+			// Set the active texture unit to texture unit 0.
+			GLES30.glActiveTexture(GLES30.GL_TEXTURE0 + i);
+			// Bind the texture to this unit.
+			GLES30.glBindTexture(GLES30.GL_TEXTURE_3D, mAndroidDataHandle[i]);
+			// Tell the texture uniform sampler to use this texture in the
+			// shader by binding to texture unit 0.
+			GLES30.glUniform1i(mTextureUniformHandle[i], i);
+			
+			GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR);
+			GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);
+			GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE);
+			GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE);	
+			GLES30.glTexParameteri(GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_WRAP_R, GLES30.GL_CLAMP_TO_EDGE);
+			
+		}
 		//Send in all slider info
 		GLES30.glUniform1f(mAlphaHandle, mAlpha);
 		GLES30.glUniform1f(mMaxHandle, mMax);
@@ -888,7 +904,11 @@ public class GridRenderer implements GLSurfaceView.Renderer {
     		
     		if(gridCamera.isInsideView(gridPoints[i]))
     		{
-    			loadGridTextures(gridPoints[i]);
+    			if(loadedPoint != i)
+    			{
+    				loadedPoint = i;
+	    			loadGridTextures(gridPoints[i]);
+    			}
     			return;
     		}
     		    			
@@ -897,7 +917,86 @@ public class GridRenderer implements GLSurfaceView.Renderer {
     
     public void loadGridTextures(GridGridpoint point)
     {
+    	//Just to get this working, reload all the textures.
+    	//If it causes lag, then we'll deal with only loading what's needed.
     	
+    	for(int i = 0; i < 8; i++)
+    	{
+    		mAndroidDataHandle[i] = loadRaw(point.textures[i]);
+    	}
+    	    	
+    }
+    
+    //
+    // loads in the raw file
+    //
+    public static int loadRaw(int fileNum)
+    {
+        // Texture object handle
+        int[] textureId = new int[1];             
+                
+        //Read in the .raw file (binary file)
+        String filename = mFilename.substring(0, mFilename.length() - 5);
+        filename = filename.concat("_");
+        filename = filename.concat(Integer.toString(fileNum));
+        filename = filename.concat(".raw");
+        
+        File file = new File(filename);
+        byte[] result = new byte[(int)file.length()];
+        try {
+          InputStream input = null;
+          try {
+            int totalBytesRead = 0;
+            input = new BufferedInputStream(new FileInputStream(file));
+            while(totalBytesRead < result.length){
+              int bytesRemaining = result.length - totalBytesRead;
+              //input.read() returns -1, 0, or more :
+              int bytesRead = input.read(result, totalBytesRead, bytesRemaining); 
+              if (bytesRead > 0){
+                totalBytesRead = totalBytesRead + bytesRead;
+              }
+            }
+            
+          }
+          finally {
+            input.close();
+          }
+        }
+        catch (FileNotFoundException ex) {
+        	
+        }
+        catch (IOException ex) {
+        	
+        }
+        
+        ByteBuffer pixelPad, pixelBuffer;
+        int width, height, depth;
+       
+    	pixelBuffer = ByteBuffer.allocateDirect(result.length);
+        pixelBuffer.put(result).position(0);
+        width  = gridTexWidth;
+        height = gridTexHeight;
+        depth  = gridTexDepth;
+        
+        
+
+        // Use tightly packed data
+        GLES30.glPixelStorei ( GLES30.GL_UNPACK_ALIGNMENT, 1 );
+
+        //  Generate a texture object
+        GLES30.glGenTextures ( 1, textureId, 0 );
+        
+        
+        // Bind the texture object
+        GLES30.glBindTexture ( GLES30.GL_TEXTURE_3D, textureId[0] );        
+        //  Load the texture
+        GLES30.glTexImage3D ( GLES30.GL_TEXTURE_3D, 0, GLES30.GL_R8, width, height, depth, 0, GLES30.GL_RED, GLES30.GL_UNSIGNED_BYTE, pixelBuffer );
+
+        // Set the filtering mode
+        GLES30.glTexParameteri ( GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_NEAREST );
+        GLES30.glTexParameteri ( GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_NEAREST );
+        
+        return textureId[0];        
     }
     public void setAlpha(float alpha)
     {

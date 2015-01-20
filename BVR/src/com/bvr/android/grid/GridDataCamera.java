@@ -135,6 +135,16 @@ public class GridDataCamera {
 		dir[2] = 0 - z;
 	}
 	
+	/**
+	 * Updates the direction that the camera is looking at.
+	 */
+	public void updateDirection(float x, float y, float z)
+	{
+		dir[0] = x;
+		dir[1] = y;
+		dir[2] = z;
+	}
+	
 	public float dotProd(float[] a, float[] b)
 	{
 		float dot = a[0] * b[0] + a[1] * b[1] + a[2] * b[2];

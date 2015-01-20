@@ -46,12 +46,14 @@ public final class R {
         public static final int toc_item=0x7f030005;
     }
     public static final class raw {
-        public static final int head_fragment_shader=0x7f050000;
-        public static final int head_vertex_shader=0x7f050001;
-        public static final int heatmap_fragment_shader=0x7f050002;
-        public static final int heatmap_vertex_shader=0x7f050003;
-        public static final int raw_fragment_shader=0x7f050004;
-        public static final int raw_vertex_shader=0x7f050005;
+        public static final int grid_fragment_shader=0x7f050000;
+        public static final int grid_vertex_shader=0x7f050001;
+        public static final int head_fragment_shader=0x7f050002;
+        public static final int head_vertex_shader=0x7f050003;
+        public static final int heatmap_fragment_shader=0x7f050004;
+        public static final int heatmap_vertex_shader=0x7f050005;
+        public static final int raw_fragment_shader=0x7f050006;
+        public static final int raw_vertex_shader=0x7f050007;
     }
     public static final class string {
         public static final int alpha=0x7f06000b;

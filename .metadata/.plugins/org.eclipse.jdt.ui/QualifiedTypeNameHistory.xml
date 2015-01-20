@@ -12,4 +12,6 @@
 <fullyQualifiedTypeName name="android.view.View.OnClickListener"/>
 <fullyQualifiedTypeName name="com.bvr.android.grid.GridRenderer"/>
 <fullyQualifiedTypeName name="com.bvr.android.grid.GridActivity"/>
+<fullyQualifiedTypeName name="com.bvr.android.grid.GridDataCamera"/>
+<fullyQualifiedTypeName name="java.lang.String"/>
 </qualifiedTypeNameHistroy>
