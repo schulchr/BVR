@@ -47,7 +47,9 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	static int gridTexWidth, gridTexHeight, gridTexDepth;
 	static GridDataCamera gridCamera;
 	static int loadedTextures[];
-	static int loadedPoint;
+	static int loadedPoint = -100;
+	static int radius;
+	static float gridUsed = 0.0f;
 	/**
 	 * Store the model matrix. This matrix is used to move models from object space (where each model can be thought
 	 * of being located at the center of the universe) to world space.
@@ -173,6 +175,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	private int mStepsHandle;
 	private int mZoomHandle;
 	private int mLightHandle;
+	private int mGridHandle;
 	
 	/**
 	 * values that are passed into the shader
@@ -182,8 +185,13 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 	private static float mMax = 1.0f;
 	private static float mSteps = 100.0f;
 	private static float mDist  = 100.0f;
-	private static float mZoom = 1.0f;
+	private static float mZoom = 2.0f;
 	private static float mLight = 0.0f;
+	private static float mX = 0.0f;
+	private static float mY = 0.0f;
+	private static float mZ = 0.0f;
+	private static float mZo = 0.0f;
+	
 
 	/**
 	 * Initialize the model data.
@@ -496,11 +504,16 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		//GridDataCamera(float f, float n, float l, float r, float t, float b)
 		gridCamera = new GridDataCamera(1.5f * lengthZ, 0.0f, .5f * lengthX, .5f * lengthX, .75f*lengthY, .75f*lengthY);
 		
-		gridCamera.updateLocation(0, 1, 0);
+		gridCamera.updateLocation(0, 0, -1);
 		
 		//choose which textures to load in here
-		setGridTextures();
-				
+		if(mZoom >= 2.0)
+			setGridTextures();
+		//if(mZoom < 2.0 && mZoom >= 1.0)
+		//	mAndroidDataHandle[0] = loadDownscaled(-1);
+		//if(mZoom < 1.0)
+			//load in small
+			
         // Initialize the accumulated rotation matrix
         Matrix.setIdentityM(mAccumulatedRotation, 0);  
         
@@ -567,6 +580,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
         mDistHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uDist");
         mStepsHandle    = GLES30.glGetUniformLocation(mProgramHandle, "uNumSteps");
         mLightHandle   = GLES30.glGetUniformLocation(mProgramHandle, "uLightToggle");
+        mGridHandle   = GLES30.glGetUniformLocation(mProgramHandle, "uGrid");
         mZoomHandle    = GLES30.glGetUniformLocation(mProgramHandle, "u_Zoom");
         
         // Calculate position of the light. Push into the distance.
@@ -598,7 +612,12 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 
     	// Scale the cube  
     	Matrix.setIdentityM(mZoomMatrix, 0);
-    	Matrix.scaleM(mZoomMatrix, 0, mZoom, mZoom, mZoom); 	
+    	
+    	if(mZoom < 2.25)
+    		Matrix.scaleM(mZoomMatrix, 0, mZoom, mZoom, mZoom); 
+    	else
+    		Matrix.scaleM(mZoomMatrix, 0, 2f, 2f, 2f); 
+    	
     	Matrix.multiplyMM(mTemporaryMatrix, 0, mModelMatrix, 0, mZoomMatrix, 0);
     	System.arraycopy(mTemporaryMatrix, 0, mModelMatrix, 0, 16);   
     	
@@ -634,7 +653,13 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		// Pass in the light position in eye space.
 		GLES30.glUniform3f(mLightPosHandle, mLightPosInEyeSpace[0], mLightPosInEyeSpace[1], mLightPosInEyeSpace[2]);
 		
-		setGridTextures();
+		//choose which textures to load in here
+				if(mZoom >= 1.4)
+					setGridTextures();
+				else if(mZoom < 1.4 && mZoom >= 1.0)
+					mAndroidDataHandle[0] = loadDownscaled(-1);
+				else if(mZoom < 1.0)
+					mAndroidDataHandle[0] = loadDownscaled(-2);
 		
 		// Pass in the texture information for each of the loaded in textures
 		for(int i = 0; i < 8; i++)
@@ -662,6 +687,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
 		GLES30.glUniform1f(mDistHandle, mDist);
 		GLES30.glUniform1f(mZoomHandle, mZoom);
 		GLES30.glUniform1f(mLightHandle, mLight);
+		GLES30.glUniform1f(mGridHandle, gridUsed);
 
 		if (mCubes != null) {
 			mCubes.render();
@@ -898,7 +924,8 @@ public class GridRenderer implements GLSurfaceView.Renderer {
     public void setGridTextures()
     {
     	gridCamera.updateViewVolume();
-    	
+    	gridUsed = 1.0f;
+
     	for(int i = 0; i < gridPoints.length; i++)
     	{
     		
@@ -913,6 +940,7 @@ public class GridRenderer implements GLSurfaceView.Renderer {
     		}
     		    			
     	}
+    	
     }
     
     public void loadGridTextures(GridGridpoint point)
@@ -920,11 +948,13 @@ public class GridRenderer implements GLSurfaceView.Renderer {
     	//Just to get this working, reload all the textures.
     	//If it causes lag, then we'll deal with only loading what's needed.
     	
+    	GLES30.glDeleteTextures(8, mAndroidDataHandle, 0);
+    	
     	for(int i = 0; i < 8; i++)
     	{
     		mAndroidDataHandle[i] = loadRaw(point.textures[i]);
     	}
-    	    	
+    	
     }
     
     //
@@ -934,13 +964,20 @@ public class GridRenderer implements GLSurfaceView.Renderer {
     {
         // Texture object handle
         int[] textureId = new int[1];             
-                
-        //Read in the .raw file (binary file)
-        String filename = mFilename.substring(0, mFilename.length() - 5);
-        filename = filename.concat("_");
-        filename = filename.concat(Integer.toString(fileNum));
-        filename = filename.concat(".raw");
         
+        /*
+         *Here I will check whether or not this is non grid or not. 
+         *For now, a fileNum of -1 will be small, -2 medium quality
+         */
+        //Read in the .raw file (binary file)
+        String filename = null;
+        if (fileNum >= 0)
+        {
+	        filename = mFilename.substring(0, mFilename.length() - 5);
+	        filename = filename.concat("_");
+	        filename = filename.concat(Integer.toString(fileNum));
+	        filename = filename.concat(".raw");
+        }
         File file = new File(filename);
         byte[] result = new byte[(int)file.length()];
         try {
@@ -998,6 +1035,9 @@ public class GridRenderer implements GLSurfaceView.Renderer {
         
         return textureId[0];        
     }
+    
+    
+    
     public void setAlpha(float alpha)
     {
     	mAlpha = alpha;
@@ -1020,7 +1060,35 @@ public class GridRenderer implements GLSurfaceView.Renderer {
     }
     public void setZoom(float zoom)
     {
-    	mZoom = zoom;
+    	//mZoom = zoom;
+    	if(mX == 1)
+    	{
+    		gridCamera.loc[0] = 2 * zoom - 1;
+    		
+    		if(gridCamera.loc[0] > 1)
+    			gridCamera.loc[0] = 1;
+    		if(gridCamera.loc[0] < -1)
+    			gridCamera.loc[0] = -1;
+    	}
+    	if(mY == 1)
+    	{
+    		gridCamera.loc[1] = 2 * zoom - 1;
+    		if(gridCamera.loc[1] > 1)
+    			gridCamera.loc[1] = 1;
+    		if(gridCamera.loc[1] < -1)
+    			gridCamera.loc[1] = -1;
+    	}
+    	
+    	if(mZ == 1)
+    	{
+    		gridCamera.loc[2] = 2 * zoom - 1;
+    		if(gridCamera.loc[2] > 1)
+    			gridCamera.loc[2] = 1;
+    		if(gridCamera.loc[2] < -1)
+    			gridCamera.loc[2] = -1;
+    	}
+    	if(mZo == 1)
+    		mZoom = zoom;
     }
     public void setFilename(String filename)
     {
@@ -1029,7 +1097,50 @@ public class GridRenderer implements GLSurfaceView.Renderer {
     public void setLightToggle(float toggle)
     {
     	mLight = toggle;
+    }    
+    
+    public void setXToggle(float toggle)
+    {
+    	mX = toggle;
+    	if(mX == 1)
+    	{
+    		mY = 0;
+    		mZ = 0;
+    		mZo = 0;
+    	}
     }
+    public void setYToggle(float toggle)
+    {
+    	mY = toggle;
+    	if(mY == 1)
+    	{
+    		mX = 0;
+    		mZo = 0;
+    		mZ = 0;
+    	}
+    }
+    public void setZToggle(float toggle)
+    {
+    	mZ = toggle;
+    	if(mZ == 1)
+    	{
+    		mY = 0;
+    		mX = 0;
+    		mZo = 0;
+    	}
+    }
+    
+    public void setZoomToggle(float toggle)
+    {
+    	mZo = toggle;
+    	if(mZ == 1)
+    	{
+    		mY = 0;
+    		mX = 0;
+    		mZ = 0;
+    	}
+    }
+    
     public void resetValues()
     {
     	mAlpha = 1.0f;
@@ -1037,7 +1148,153 @@ public class GridRenderer implements GLSurfaceView.Renderer {
     	mMax = 1.0f;
     	mSteps = 100.0f;
     	mDist  = 100.0f;
-    	mZoom = 1.0f;
+    	mZoom = 2.0f;
     	mLight = 0.0f;
     }
+    public float getGridLocationPoint(int i)
+    {
+    	return gridCamera.loc[i];
+    }
+    
+    
+    public int loadDownscaled(int type)
+    {
+    	//already loaded in this type, don't do it again
+    	if(loadedPoint == type)
+    		return mAndroidDataHandle[0];
+    	
+    	//turn of the toggle for the grid
+    	gridUsed = 0;
+    	
+    	GLES30.glDeleteTextures(8, mAndroidDataHandle, 0);
+        // Texture object handle
+        int[] textureId = new int[1];      
+        String filename = null;
+        
+        filename = mFilename.substring(0, mFilename.length() - 5);        
+        if(type == -1)
+        	filename = filename.concat("Medium.raw");
+        if(type == -2)
+        	filename = filename.concat("Small.raw");
+        
+		int dim[] = new int[3];
+		int ratio[] = new int[3];
+        //Read in the .dat file for data dimensions
+        try {
+			File file = new File(filename + ".dat");
+			FileReader fileReader = new FileReader(file);
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
+			StringBuffer stringBuffer = new StringBuffer();
+			String line;
+			//dimensions of the data
+			int count = 0;
+			int count2 = 0;
+			while ((line = bufferedReader.readLine()) != null) {
+				if(count < 3)
+					dim[count++] = Integer.parseInt(line);
+				else
+					ratio[count2++] = Integer.parseInt(line);				
+			}
+			fileReader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+        
+        //Read in the .raw file (binary file)
+        File file = new File(filename);
+        byte[] result = new byte[(int)file.length()];
+        try {
+          InputStream input = null;
+          try {
+            int totalBytesRead = 0;
+            input = new BufferedInputStream(new FileInputStream(file));
+            while(totalBytesRead < result.length){
+              int bytesRemaining = result.length - totalBytesRead;
+              //input.read() returns -1, 0, or more :
+              int bytesRead = input.read(result, totalBytesRead, bytesRemaining); 
+              if (bytesRead > 0){
+                totalBytesRead = totalBytesRead + bytesRead;
+              }
+            }
+            
+          }
+          finally {
+            input.close();
+          }
+        }
+        catch (FileNotFoundException ex) {
+        	
+        }
+        catch (IOException ex) {
+        	
+        }
+        
+        ByteBuffer pixelPad, pixelBuffer;
+        int width, height, depth;
+        
+        //If the data is needing padding in the z direction  
+        float dimRatio = ((float)dim[1]/(float)dim[2]);
+        float highEndRatio = (float) (ratio[2] + .1);
+        float lowEndRatio = (float) (ratio[2] - .1);
+        
+       /* if(dimRatio >= highEndRatio || dimRatio  <= lowEndRatio)
+        {
+        	
+        	//Find out how much padding is needed
+        	int paddingNeeded = (dim[1] / ratio[2]) - dim[2];
+        	
+        	//Don't want to mess with negative padding right now...
+        	if(paddingNeeded < 0)
+        	{
+        		pixelBuffer = ByteBuffer.allocateDirect(result.length);
+                pixelBuffer.put(result).position(0);
+                width = dim[0];
+                height = dim[1];
+                depth = dim[2];
+        	}
+        	else
+        	{
+	        	pixelPad = ByteBuffer.allocateDirect(dim[0] * dim[1] * paddingNeeded/2);
+	            pixelBuffer = ByteBuffer.allocateDirect(dim[0] * dim[0] * dim[0]);
+	            pixelBuffer.put(pixelPad);
+	            pixelBuffer.put(result).position(0);
+	            
+	            width = dim[0];
+	            height = dim[1];
+	            depth = paddingNeeded + dim[2];
+        	}
+        }
+        
+        else
+        {*/
+        	pixelBuffer = ByteBuffer.allocateDirect(result.length);
+            pixelBuffer.put(result).position(0);
+            width = dim[0];
+            height = dim[1];
+            depth = dim[2];
+       // }
+        
+        
+
+        // Use tightly packed data
+        GLES30.glPixelStorei ( GLES30.GL_UNPACK_ALIGNMENT, 1 );
+
+        //  Generate a texture object
+        GLES30.glGenTextures ( 1, textureId, 0 );
+
+        // Bind the texture object
+        GLES30.glBindTexture ( GLES30.GL_TEXTURE_3D, textureId[0] );
+
+        //  Load the texture
+        GLES30.glTexImage3D ( GLES30.GL_TEXTURE_3D, 0, GLES30.GL_R8, width, height, depth, 0, GLES30.GL_RED, GLES30.GL_UNSIGNED_BYTE, pixelBuffer );
+        
+        // Set the filtering mode
+        GLES30.glTexParameteri ( GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_NEAREST );
+        GLES30.glTexParameteri ( GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_NEAREST );
+        
+        loadedPoint = type;
+        
+        return textureId[0];      
+	}
 }

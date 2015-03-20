@@ -63,7 +63,7 @@
            android:layout_marginBottom="30dp"
            android:layout_marginRight="5dp"
            android:layout_marginTop="30dp"
-           android:max="400"
+           android:max="500"
            android:progress="0" />
 
        <com.bvr.android.VerticalSeekBar
@@ -95,10 +95,28 @@
        android:orientation="vertical" >
 
        <CheckBox
-           android:id="@+id/checkBox1"
+           android:id="@+id/CheckBoxX"
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
-           android:text="Light" />
+           android:text="X" />
+
+       <CheckBox
+           android:id="@+id/CheckBoxY"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="Y" />
+
+       <CheckBox
+           android:id="@+id/CheckBoxZ"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="Z" />
+       
+       <CheckBox
+           android:id="@+id/CheckBoxZoom"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="Zoom" />
 
    </LinearLayout>
    

@@ -30,23 +30,8 @@ uniform float uMax;
 uniform float uNumSteps;
 uniform float uDist;
 uniform float uLightToggle;
+uniform float uGrid;
 
-
-//Finds the gradient of the current point. 
-//vec3 findGradient(vec3 currTex, float sampleSize)
-//{
-//	vec3 s1, s2;
-//	
-//	s1.x = texture(u_Texture, vec3(currTex.x - sampleSize, currTex.y, currTex.z)).r;	
-//	s1.y = texture(u_Texture, vec3(currTex.x, currTex.y  - sampleSize, currTex.z)).r;	
-//	s1.z = texture(u_Texture, vec3(currTex.x, currTex.y, currTex.z - sampleSize)).r;	
-//	
-//	s2.x = texture(u_Texture, vec3(currTex.x + sampleSize, currTex.y, currTex.z)).r;	
-//	s2.y = texture(u_Texture, vec3(currTex.x, currTex.y  + sampleSize, currTex.z)).r;	
-//	s2.z = texture(u_Texture, vec3(currTex.x, currTex.y, currTex.z + sampleSize)).r;	
-//	
-//	return normalize(s1 - s2);
-//}
 
 //This function will take a given global texture coordinate and translate it to the appropriate local texture coordinate
 float sampleTextures(vec3 tc)
@@ -178,22 +163,20 @@ void main()
 		
 		
 		//Sample the texture
-		float scalar = sampleTextures(STP);
+		
+		float scalar;
+		
+		if(uGrid == 1.0f)
+			scalar = sampleTextures(STP);	
+		else	
+			scalar = texture(u_Texture_BLL, STP).r;
 		
 		//Skip if they're past thresholds
 		if(scalar <= uMin || scalar >= uMax)
 		{
 			continue;
 		}
-			
-		if(!gradFound)
-		{
-			//gradient = vec3(u_MVMatrix * vec4(findGradient(STP, .001), 0.));
-			//gradFound = true;
-			//gl_FragColor = vec4(gradient, 1.0);
-			//return;
-		}
-				
+		
 		//Convert to color here
 		vec3 rgb = vec3(scalar, scalar, scalar);
 		

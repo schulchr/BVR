@@ -3,26 +3,26 @@
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
 		<item value="257" key="DIALOG_WIDTH"/>
 		<item value="387" key="DIALOG_Y_ORIGIN"/>
-		<item value="381" key="DIALOG_HEIGHT"/>
 		<item value="1141" key="DIALOG_X_ORIGIN"/>
+		<item value="381" key="DIALOG_HEIGHT"/>
 		<item value="1|Segoe UI|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI" key="DIALOG_FONT_NAME"/>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="true" key="wrap"/>
-		<item value="false" key="isRegEx"/>
 		<item value="false" key="casesensitive"/>
+		<item value="false" key="isRegEx"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="gridCamera" key="selection"/>
+		<item value="setDist" key="selection"/>
 		<list key="findhistory">
-			<item value="gridCamera"/>
-			<item value="raw"/>
-			<item value="//make a temporary array of loaded textures"/>
-			<item value="loadedTex"/>
-			<item value="delta"/>
-			<item value="readGridFile"/>
+			<item value="string.grid"/>
 			<item value="grid"/>
-			<item value="setup grid"/>
+			<item value="&quot;grid&quot;"/>
+			<item value="mGridHandle"/>
+			<item value="setGridTextures"/>
+			<item value="handle"/>
+			<item value="mZoom"/>
+			<item value="loadedPoint"/>
 		</list>
 		<list key="replacehistory">
 			<item value="GridRenderer"/>

@@ -168,25 +168,113 @@ public class GridActivity extends Activity {
 				}
 
 			  });  
-		CheckBox checkBox = (CheckBox) findViewById(R.id.checkBox1);
-		 
-		checkBox.setOnClickListener(new OnClickListener() {
+		CheckBox checkBoxX = (CheckBox) findViewById(R.id.CheckBoxX);
+		CheckBox checkBoxY = (CheckBox) findViewById(R.id.CheckBoxY);
+		CheckBox checkBoxZ = (CheckBox) findViewById(R.id.CheckBoxZ);
+		CheckBox checkBoxZoom = (CheckBox) findViewById(R.id.CheckBoxZoom);
+		
+		checkBoxX.setOnClickListener(new OnClickListener() {
 	 
 		  @Override
 		  public void onClick(View v) {
-			  
+
+				CheckBox checkBoxY = (CheckBox) findViewById(R.id.CheckBoxY);
+				CheckBox checkBoxZ = (CheckBox) findViewById(R.id.CheckBoxZ);
+				CheckBox checkBoxZoom = (CheckBox) findViewById(R.id.CheckBoxZoom);
+				
 			if (((CheckBox) v).isChecked()) 
 			{
-				mRenderer.setLightToggle(1.0f);
+				mRenderer.setXToggle(1.0f);
+				checkBoxY.setChecked(false);
+				checkBoxZ.setChecked(false);
+				checkBoxZoom.setChecked(false);
+				VerticalSeekBar zoomBar = (VerticalSeekBar)findViewById(R.id.zoomSeekbar);
+				//int val = (int) (mRenderer.getGridLocationPoint(0)* 300.0f);
+				//zoomBar.setProgress(val); 
+				//zoomBar.refreshDrawableState();
 			}
 			else
 			{
-				mRenderer.setLightToggle(0.0f);
+				mRenderer.setXToggle(0.0f);
 			}
 	 
 		  }
 		});
 		
+		checkBoxY.setOnClickListener(new OnClickListener() {
+			 
+			  @Override
+			  public void onClick(View v) {
+				  
+				CheckBox checkBoxX = (CheckBox) findViewById(R.id.CheckBoxX);
+				CheckBox checkBoxZ = (CheckBox) findViewById(R.id.CheckBoxZ);
+				CheckBox checkBoxZoom = (CheckBox) findViewById(R.id.CheckBoxZoom);
+				if (((CheckBox) v).isChecked()) 
+				{
+					mRenderer.setYToggle(1.0f);
+					
+					checkBoxX.setChecked(false);
+					checkBoxZ.setChecked(false);
+					checkBoxZoom.setChecked(false);
+					//VerticalSeekBar zoomBar = (VerticalSeekBar)findViewById(R.id.zoomSeekbar);
+					//zoomBar.setProgress((int) (mRenderer.getGridLocationPoint(1)* 300.0f)); 
+				}
+				else
+				{
+					mRenderer.setYToggle(0.0f);
+				}
+		 
+			  }
+			});
+		
+		checkBoxZ.setOnClickListener(new OnClickListener() {
+			 
+			  @Override
+			  public void onClick(View v) {
+				CheckBox checkBoxX = (CheckBox) findViewById(R.id.CheckBoxX);
+				CheckBox checkBoxY = (CheckBox) findViewById(R.id.CheckBoxY);
+				CheckBox checkBoxZoom = (CheckBox) findViewById(R.id.CheckBoxZoom);
+				if (((CheckBox) v).isChecked()) 
+				{
+					mRenderer.setZToggle(1.0f);
+					checkBoxX.setChecked(false);
+					checkBoxY.setChecked(false);
+					checkBoxZoom.setChecked(false);
+					//VerticalSeekBar zoomBar = (VerticalSeekBar)findViewById(R.id.zoomSeekbar);
+					//zoomBar.setProgress((int) (mRenderer.getGridLocationPoint(2)* 300.0f)); 
+				}
+				else
+				{
+					mRenderer.setZToggle(0.0f);
+				}
+		 
+			  }
+			});
+		
+		checkBoxZoom.setOnClickListener(new OnClickListener() {
+			 
+			  @Override
+			  public void onClick(View v) {
+				CheckBox checkBoxX = (CheckBox) findViewById(R.id.CheckBoxX);
+				CheckBox checkBoxY = (CheckBox) findViewById(R.id.CheckBoxY);
+				CheckBox checkBoxZ = (CheckBox) findViewById(R.id.CheckBoxZ);
+				
+				if (((CheckBox) v).isChecked()) 
+				{
+					mRenderer.setZoomToggle(1.0f);
+					checkBoxX.setChecked(false);
+					checkBoxY.setChecked(false);
+					checkBoxZ.setChecked(false);
+					//VerticalSeekBar zoomBar = (VerticalSeekBar)findViewById(R.id.zoomSeekbar);
+					//zoomBar.setProgress((int) (mRenderer.getGridLocationPoint(2)* 300.0f)); 
+				}
+				else
+				{
+					mRenderer.setZToggle(0.0f);
+				}
+		 
+			  }
+			});
 		//Set the filename for the file to be read in
 
 		mRenderer.setFilename(intent.getStringExtra(TableOfContents.EXTRA_MESSAGE));

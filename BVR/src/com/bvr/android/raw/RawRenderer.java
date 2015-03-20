@@ -828,7 +828,7 @@ public class RawRenderer implements GLSurfaceView.Renderer {
         float highEndRatio = (float) (ratio[2] + .1);
         float lowEndRatio = (float) (ratio[2] - .1);
         
-        if(dimRatio >= highEndRatio || dimRatio  <= lowEndRatio)
+       /* if(dimRatio >= highEndRatio || dimRatio  <= lowEndRatio)
         {
         	
         	//Find out how much padding is needed
@@ -857,13 +857,13 @@ public class RawRenderer implements GLSurfaceView.Renderer {
         }
         
         else
-        {
+        {*/
         	pixelBuffer = ByteBuffer.allocateDirect(result.length);
             pixelBuffer.put(result).position(0);
             width = dim[0];
             height = dim[1];
             depth = dim[2];
-        }
+       // }
         
         
 
@@ -878,7 +878,7 @@ public class RawRenderer implements GLSurfaceView.Renderer {
 
         //  Load the texture
         GLES30.glTexImage3D ( GLES30.GL_TEXTURE_3D, 0, GLES30.GL_R8, width, height, depth, 0, GLES30.GL_RED, GLES30.GL_UNSIGNED_BYTE, pixelBuffer );
-
+        
         // Set the filtering mode
         GLES30.glTexParameteri ( GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_NEAREST );
         GLES30.glTexParameteri ( GLES30.GL_TEXTURE_3D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_NEAREST );

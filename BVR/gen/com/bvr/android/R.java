@@ -22,15 +22,19 @@ public final class R {
         public static final int usb_android=0x7f020008;
     }
     public static final class id {
-        public static final int Image=0x7f08000b;
-        public static final int SubTitle=0x7f08000d;
-        public static final int Title=0x7f08000c;
+        public static final int CheckBoxX=0x7f080007;
+        public static final int CheckBoxY=0x7f080008;
+        public static final int CheckBoxZ=0x7f080009;
+        public static final int CheckBoxZoom=0x7f08000a;
+        public static final int Image=0x7f08000f;
+        public static final int SubTitle=0x7f080011;
+        public static final int Title=0x7f080010;
         public static final int alphaSeekbar=0x7f080001;
-        public static final int checkBox1=0x7f080007;
+        public static final int checkBox1=0x7f08000e;
         public static final int distSeekbar=0x7f080005;
-        public static final int editText1=0x7f080008;
-        public static final int editText2=0x7f080009;
-        public static final int editText3=0x7f08000a;
+        public static final int editText1=0x7f08000b;
+        public static final int editText2=0x7f08000c;
+        public static final int editText3=0x7f08000d;
         public static final int gl_surface_view=0x7f080000;
         public static final int maxSeekbar=0x7f080003;
         public static final int minSeekbar=0x7f080002;
